@@ -8,7 +8,11 @@ function Util.get_blueprint(bp)
         return nil
     end
     if bp.is_blueprint_book and bp.active_index then
-        return Util.get_blueprint(bp.get_inventory(defines.inventory.item_main)[bp.active_index])
+        local inventory = bp.get_inventory(defines.inventory.item_main)
+        if inventory.get_item_count() == 0 then
+            return nil
+        end
+        return Util.get_blueprint(inventory[bp.active_index])
     end
     if bp.is_blueprint then
         return bp
