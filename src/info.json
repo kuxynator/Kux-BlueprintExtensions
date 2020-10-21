@@ -1,0 +1,13 @@
+{
+    "name": "Kux-BlueprintExtensions",
+    "version": "1.0.0",
+    "title": "Blueprint Extensions",
+    "author": "Kuxynator",
+    "factorio_version": "1.0",
+    "dependencies": [
+		"base >= 1.0", 
+		"? GDIW",
+		"BlueprintExtensions"
+	],
+    "description": "Adds tools for updating and placing blueprints."
+}
