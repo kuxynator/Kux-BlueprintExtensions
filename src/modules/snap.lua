@@ -43,6 +43,7 @@ local Snap = {
 }
 
 function Snap.on_nudge_action(player, event, action)
+	Log.trace("Snap.on_nudge_action")
     local bp = Util.get_blueprint(player.cursor_stack)
     if not bp then
         return nil
@@ -54,22 +55,23 @@ end
 
 
 function Snap.on_snap_action(player, event, action)
+	Log.trace("Snap.on_snap_action")
     local bp = Util.get_blueprint(player.cursor_stack)
     if not bp then
         return nil
     end
 
     local player_settings = player.mod_settings
-    local center = (player_settings["BlueprintExtensions_cardinal-center"].value and 0.5) or nil
+    local center = (player_settings["Kux-BlueprintExtensions_cardinal-center"].value and 0.5) or nil
     local xdir, ydir = table.unpack(Snap.SNAPS[action.data])
     if xdir == nil then
         xdir = center
-    elseif player_settings["BlueprintExtensions_horizontal-invert"].value then
+    elseif player_settings["Kux-BlueprintExtensions_horizontal-invert"].value then
         xdir = 1-xdir
     end
     if ydir == nil then
         ydir = center
-    elseif player_settings["BlueprintExtensions_vertical-invert"].value then
+    elseif player_settings["Kux-BlueprintExtensions_vertical-invert"].value then
         ydir = 1-ydir
     end
     return Snap.align_blueprint(bp, xdir, ydir)
@@ -94,6 +96,7 @@ end
 
 
 function Snap.blueprint_bounds(bp)
+	Log.trace("Snap.blueprint_bounds")
     local prototypes = game.entity_prototypes
 
     local bounds = {
@@ -139,33 +142,12 @@ function Snap.blueprint_bounds(bp)
     return bounds, align
 end
 
-
-local function offset(t, xoff, yoff)
-    for _, v in pairs(t) do
-        if not v.position then
-            return nil
-        end
-
-        v.position.x = v.position.x + xoff
-        v.position.y = v.position.y + yoff
-
-    end
-    return t
-end
-
-
 function Snap.offset_blueprint(bp, xoff, yoff)
-    local entities = bp.get_blueprint_entities()
-    local tiles = bp.get_blueprint_tiles()
-
-    if entities then
-        bp.set_blueprint_entities(offset(entities, xoff, yoff))
-    end
-    if tiles then
-        bp.set_blueprint_tiles(offset(tiles, xoff, yoff))
-    end
+	local bpt = Blueprint.exportToTable(bp)
+	Blueprint.offset(bpt, xoff, yoff)
+	local result = Blueprint.importFromTable(bp, bpt)
+	--TODO result
 end
-
 
 local function calculate_offset(dir, bound, align)
     local o = (dir ~= nil and math.floor(((-bound.min_edge - (dir * (bound.max_edge-bound.min_edge)))/ align)) * align) or 0
@@ -177,8 +159,8 @@ local function calculate_offset(dir, bound, align)
     return o
 end
 
-
 function Snap.align_blueprint(bp, xdir, ydir)
+	Log.trace("Snap.align_blueprint")
     local bounds, align = Snap.blueprint_bounds(bp)
 --    game.print("bounds.x=" .. serpent.line(bounds.x))
 --    game.print("bounds.y=" .. serpent.line(bounds.y))
@@ -195,6 +177,7 @@ end
 
 
 function Snap.nudge_blueprint(bp, xdir, ydir)
+	Log.trace("Snap.nudge_blueprint")
     local align = 1
 
     for _, entity in pairs(bp.get_blueprint_entities() or {}) do
@@ -209,10 +192,10 @@ end
 
 
 for k,_ in pairs(Snap.SNAPS) do
-    actions["BlueprintExtensions_snap-" .. k].handler = Snap.on_snap_action
+    actions["Kux-BlueprintExtensions_snap-" .. k].handler = Snap.on_snap_action
 end
 for k,_ in pairs(Snap.NUDGES) do
-    actions["BlueprintExtensions_nudge-" .. k].handler = Snap.on_nudge_action
+    actions["Kux-BlueprintExtensions_nudge-" .. k].handler = Snap.on_nudge_action
 end
 
 

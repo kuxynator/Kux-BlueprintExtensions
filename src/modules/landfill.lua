@@ -313,7 +313,7 @@ function Landfill.landfill_action(player, event, action)
         return
     end
 
-    local mode = player.mod_settings["BlueprintExtensions_landfill-mode"].value
+    local mode = player.mod_settings["Kux-BlueprintExtensions_landfill-mode"].value
     if mode == 'update' then    -- Update the existing blueprint.
         bp.set_blueprint_tiles(tiles)
         return
@@ -345,7 +345,7 @@ function Landfill.landfill_action(player, event, action)
 end
 
 
-actions['BlueprintExtensions_landfill'].handler = Landfill.landfill_action
+actions['Kux-BlueprintExtensions_landfill'].handler = Landfill.landfill_action
 
 
 return Landfill

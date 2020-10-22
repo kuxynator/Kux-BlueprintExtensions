@@ -2,7 +2,7 @@
 local Util = require("util")
 local actions = require("actions")
 
-local CLONED_BLUEPRINT = "BlueprintExtensions_cloned-blueprint"
+local CLONED_BLUEPRINT = "Kux-BlueprintExtensions_cloned-blueprint"
 local VERSION_PATTERN = "(v[.]?)(%d)$"  -- Matches version number at end of blueprints.
 local DEFAULT_VERSION = " v.2"
 
@@ -81,7 +81,7 @@ function Updater.on_selected_area(event)
         local label = updater.label
         local found
         local versioning = player.mod_settings[
-            alt and "BlueprintExtensions_alt-version-increment" or "BlueprintExtensions_version-increment"
+            alt and "Kux-BlueprintExtensions_alt-version-increment" or "Kux-BlueprintExtensions_version-increment"
         ].value
         if versioning ~= 'off' then
             label, found = string.gsub(label, VERSION_PATTERN, function(v, n) return v .. (n+1) end)
@@ -135,7 +135,7 @@ function Updater.on_player_configured_blueprint(event)
 end
 
 
-actions['BlueprintExtensions_clone-blueprint'].handler = Updater.clone
+actions['Kux-BlueprintExtensions_clone-blueprint'].handler = Updater.clone
 
 
 Updater.events = {

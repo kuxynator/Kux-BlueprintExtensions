@@ -46,7 +46,7 @@ end
 
 
 script.on_event(
-        "BlueprintExtensions_cleared_cursor_proxy",
+        "Kux-BlueprintExtensions_cleared_cursor_proxy",
         function(event) return Tempprint.nuke_temporary(game.players[event.player_index]) end
 )
 

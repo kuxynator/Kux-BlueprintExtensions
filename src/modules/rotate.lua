@@ -32,7 +32,7 @@ function Rotate.rotate_action(player, event, action)
 end
 
 
-actions['BlueprintExtensions_rotate-clockwise'].handler = Rotate.rotate_action
+actions['Kux-BlueprintExtensions_rotate-clockwise'].handler = Rotate.rotate_action
 
 
 return Rotate

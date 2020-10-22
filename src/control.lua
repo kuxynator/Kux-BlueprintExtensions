@@ -1,19 +1,23 @@
+Modules = require("__Kux-CoreLib__/lib/Modules")
+Log     = require ("__Kux-CoreLib__/lib/Log")
+
 local Util = require('util')
 local actions = require('actions')
 local mod_gui = require('mod-gui')
 local GUI = require('gui')
 
+if script.active_mods["gvv"] then require("__gvv__.gvv")() end
 
-local modules = {
-    Snap = require('modules/snap'),
-    Updater = require('modules/updater'),
-    Flip = require('modules/flip'),
-    Wireswap = require('modules/wireswap'),
-    Rotate = require('modules/rotate'),
-    Tempprint = require('modules/tempprint'),
-    Landfill = require('modules/landfill')
-}
-
+require "__Kux-CoreLib__/lib/lua"
+require "__Kux-CoreLib__/lib/Colors"
+require "modules/Blueprint"
+Modules.Snap = require('modules/snap')
+Modules.Updater = require('modules/updater')
+Modules.Flip = require('modules/flip')
+Modules.Wireswap = require('modules/wireswap')
+Modules.Rotate = require('modules/rotate')
+Modules.Tempprint = require('modules/tempprint')
+Modules.Landfill = require('modules/landfill')
 
 local event_handlers = {}
 local function add_event_handler(event, fn)
@@ -46,27 +50,20 @@ end
 
 
 -- Build list of required event handlers.
-for modname, module in pairs(modules) do
+for modname, module in pairs(Modules) do
+	if type(module) ~= "table" then goto next end
     if module.events then
         for event, fn in pairs(module.events) do
             add_event_handler(event, fn)
         end
-    end
+	end
+	::next::
 end
-
-
-local function call_module_methods(method, ...)
-    for _, module in pairs(modules) do
-        if module[method] then module[method](...) end
-    end
-end
-
 
 local function dispatch_action(event, action)
     if not action or not action.handler then return end
     local player = game.players[event.player_index]
     return action.handler(player, event, action)
-
 end
 
 
@@ -80,36 +77,35 @@ local function init_globals()
 end
 
 
+--#region bootstrap
+
 script.on_init(function()
     -- FIXME: Update all gui and shortcut bars.
     init_globals()
-    call_module_methods('on_init')
+	Modules.on_init()
 end)
 
 
-script.on_load(function() call_module_methods('on_load') end)
+script.on_load(function()
+	Modules.on_load()
+end)
 
 
-script.on_configuration_changed(function(data)
+script.on_configuration_changed(function(e)
     -- FIXME: Update all gui and shortcut bars.
     init_globals()
-    call_module_methods('on_configuration_changed', data)
+	Modules.on_configuration_changed(e)
 end)
 
+--#end region
 
-add_event_handler(
-        defines.events.on_gui_click,
-        function(event)
-            return dispatch_action(event, actions[event.element.name])
-        end
-)
+add_event_handler(defines.events.on_gui_click, function(event)
+	return dispatch_action(event, actions[event.element.name])
+end)
 
-add_event_handler(
-        defines.events.on_lua_shortcut,
-        function(event)
-            return dispatch_action(event, actions[event.prototype_name])
-        end
-)
+add_event_handler(defines.events.on_lua_shortcut,function(event)
+	return dispatch_action(event, actions[event.prototype_name])
+end)
 
 add_event_handler(defines.events.on_player_removed, function(event)
     --call_module_methods('on_player_removed', event)
@@ -118,22 +114,21 @@ add_event_handler(defines.events.on_player_removed, function(event)
 end)
 
 
-add_event_handler(
-        defines.events.on_player_cursor_stack_changed,
-    function(event) GUI.update_visibility(game.players[event.player_index]) end
-)
+add_event_handler(defines.events.on_player_cursor_stack_changed, function(event)
+	GUI.update_visibility(game.players[event.player_index])
+end)
 
 
-add_event_handler(defines.events.on_runtime_mod_setting_changed, function(event)
+add_event_handler(defines.events.on_runtime_mod_setting_changed, function(e)
+	Modules.call('on_runtime_mod_setting_changed', e)
+
     if not (
-            event.setting_type == 'runtime-per-user'
-            and string.find(event.setting, "BlueprintExtensions_show-", 1, true) == 1
+            e.setting_type == 'runtime-per-user'
+            and string.find(e.setting, "Kux-BlueprintExtensions_show-", 1, true) == 1
     ) then
         return
     end
-
-    GUI.setup(game.players[event.player_index])
-    call_module_methods('on_runtime_mod_setting_changed', event)
+    GUI.setup(game.players[e.player_index])
 end)
 
 

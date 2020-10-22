@@ -26,9 +26,9 @@ function Wireswap.swap(player, event, action)
     end
 end
 
-actions["BlueprintExtensions_wireswap"].handler = Wireswap.swap
+actions["Kux-BlueprintExtensions_wireswap"].handler = Wireswap.swap
 
---script.on_event("BlueprintExtensions_wireswap", function(event) return Wireswap.swap(game.players[event.player_index]) end)
+--script.on_event("Kux-BlueprintExtensions_wireswap", function(event) return Wireswap.swap(game.players[event.player_index]) end)
 
 
 return Wireswap

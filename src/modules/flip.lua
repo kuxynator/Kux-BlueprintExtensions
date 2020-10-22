@@ -125,7 +125,7 @@ function Flip.flip_action(player, event, action)
     local proto, name, dir
     local axis = translate.axis
     local ents
-    local support_gdiw = player.mod_settings["BlueprintExtensions_support-gdiw"].value
+    local support_gdiw = player.mod_settings["Kux-BlueprintExtensions_support-gdiw"].value
 
     ents = bp.get_blueprint_entities()
     if ents then
@@ -205,8 +205,8 @@ function Flip.flip_action(player, event, action)
     end
 end
 
-actions['BlueprintExtensions_flip-h'].handler = Flip.flip_action
-actions['BlueprintExtensions_flip-v'].handler = Flip.flip_action
+actions['Kux-BlueprintExtensions_flip-h'].handler = Flip.flip_action
+actions['Kux-BlueprintExtensions_flip-v'].handler = Flip.flip_action
 
 --
 --script.on_event(defines.events.on_runtime_mod_setting_changed, function(event)
