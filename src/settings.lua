@@ -49,6 +49,13 @@ data:extend{
         setting_type = "runtime-per-user",
         order = 301,
         default_value = true,
+	},
+	{
+        type = "bool-setting",
+        name = "Kux-BlueprintExtensions_support-fluid_permutations",
+        setting_type = "runtime-per-user",
+        order = 302,
+        default_value = true,
     },
     {
         type = "string-setting",

@@ -114,7 +114,6 @@ local function _gdiw_recipe(recipe)
     return (game.recipe_prototypes[recipe]) and recipe or nil
 end
 
-
 function Flip.flip_action(player, event, action)
     local translate = Flip.translations[action.data]
     local bp = Util.get_blueprint(player.cursor_stack)
@@ -122,86 +121,92 @@ function Flip.flip_action(player, event, action)
         return
     end
 
-    local proto, name, dir
-    local axis = translate.axis
-    local ents
-    local support_gdiw = player.mod_settings["Kux-BlueprintExtensions_support-gdiw"].value
+    local prototype, name, direction
+	local axis = translate.axis
+    local entities
+	local support_gdiw = player.mod_settings["Kux-BlueprintExtensions_support-gdiw"].value
+	local support_fluid_permutations = player.mod_settings["Kux-BlueprintExtensions_support-fluid_permutations"].value and FluidPermutation.isAvailable
 
-    ents = bp.get_blueprint_entities()
-    if ents then
-        for _,ent in pairs(ents) do
-            proto = game.entity_prototypes[ent.name]
-            name = (proto and proto.type) or ent.name
-            dir = ent.direction or 0
+    entities = bp.get_blueprint_entities()
+    if entities then
+        for _,entity in pairs(entities) do
+            prototype = game.entity_prototypes[entity.name]
+            name = (prototype and prototype.type) or entity.name
+            direction = entity.direction or 0
             if name == "curved-rail" then
-                ent.direction = (translate.rail_offset - dir)%8
+                entity.direction = (translate.rail_offset - direction)%8
             elseif name == "storage-tank" then
-                if dir == 2 or dir == 6 then
-                    ent.direction = 4
+                if direction == 2 or direction == 6 then
+                    entity.direction = 4
                 else
-                    ent.direction = 2
+                    entity.direction = 2
                 end
             elseif name == "rail-signal" or name == "rail-chain-signal" then
-                if translate.signals[dir] ~= nil then
-                    ent.direction = translate.signals[dir]
+                if translate.signals[direction] ~= nil then
+                    entity.direction = translate.signals[direction]
                 end
             elseif name == "train-stop" then
-                if translate.train_stops[dir] ~= nil then
-                    ent.direction = translate.train_stops[dir]
+                if translate.train_stops[direction] ~= nil then
+                    entity.direction = translate.train_stops[direction]
                 end
             else
-                ent.direction = (translate.default_offset - dir)%8
+                entity.direction = (translate.default_offset - direction)%8
             end
 
-            ent.position[axis] = -ent.position[axis]
-            if ent.drop_position ~= nil then
-                ent.drop_position[axis] = -ent.drop_position[axis]
+            entity.position[axis] = -entity.position[axis]
+            if entity.drop_position ~= nil then
+                entity.drop_position[axis] = -entity.drop_position[axis]
             end
-            if ent.pickup_position ~= nil then
-                ent.pickup_position[axis] = -ent.pickup_position[axis]
-            end
-
-            if Flip.sides[ent.input_priority] then
-                ent.input_priority = Flip.sides[ent.input_priority]
-            end
-            if Flip.sides[ent.output_priority] then
-                ent.output_priority = Flip.sides[ent.output_priority]
+            if entity.pickup_position ~= nil then
+                entity.pickup_position[axis] = -entity.pickup_position[axis]
             end
 
-            -- Support GDIW
-            if support_gdiw and ent.recipe then
+            if Flip.sides[entity.input_priority] then
+                entity.input_priority = Flip.sides[entity.input_priority]
+            end
+            if Flip.sides[entity.output_priority] then
+                entity.output_priority = Flip.sides[entity.output_priority]
+			end
+
+			if support_fluid_permutations and entity.recipe then
+				-- TODO support_fluid_permutations
+				local result = FluidPermutation.mirror(entity.recipe)
+				if result then entity.recipe = result end
+			elseif support_gdiw and entity.recipe then
+				-- Support GDIW
                 local t
-                local _, _, recipe, mod = string.find(ent.recipe, "^(.*)%-GDIW%-([BIO])R$")
+                local _, _, recipe, mod = string.find(entity.recipe, "^(.*)%-GDIW%-([BIO])R$")
                 if mod == 'B' then      -- Both mirrored
-                    ent.recipe = recipe
+                    entity.recipe = recipe
                 elseif mod == 'I' then  -- Input mirrored
-                    ent.recipe = _gdiw_recipe(recipe .. '-GDIW-OR') or recipe
+                    entity.recipe = _gdiw_recipe(recipe .. '-GDIW-OR') or recipe
                 elseif mod == 'O' then  -- Output mirrored
-                    ent.recipe = _gdiw_recipe(recipe .. '-GDIW-IR') or recipe
+                    entity.recipe = _gdiw_recipe(recipe .. '-GDIW-IR') or recipe
                 else  -- Neither mirrored
-                    recipe = ent.recipe
-                    ent.recipe = (
+                    recipe = entity.recipe
+                    entity.recipe = (
                            _gdiw_recipe(recipe .. '-GDIW-BR')
                         or _gdiw_recipe(recipe .. '-GDIW-IR')
                         or _gdiw_recipe(recipe .. '-GDIW-OR')
                         or recipe
                     )
                 end
-            end
+			end
+
         end
-        bp.set_blueprint_entities(ents)
+        bp.set_blueprint_entities(entities)
     end
 
-    ents = bp.get_blueprint_tiles()
-    if ents then
-        for _,ent in pairs(ents) do
+    entities = bp.get_blueprint_tiles()
+    if entities then
+        for _,ent in pairs(entities) do
             ent.direction = (
                 translate.default_offset
                 - (ent.direction or 0)
             )%8
             ent.position[axis] = -ent.position[axis]
         end
-        bp.set_blueprint_tiles(ents)
+        bp.set_blueprint_tiles(entities)
     end
 end
 

@@ -3,6 +3,8 @@
 		"defines",
 		"game",
 		"script",
-		"global"
+		"global",
+		"remote",
+		"iif"
 	]
 }

@@ -182,7 +182,6 @@ function Landfill.get_prototype_overrides()
     return results
 end
 
-
 function Landfill.on_load()
     Landfill.prototype_overrides = global.prototype_overrides
     if Landfill.prototype_overrides then
@@ -217,20 +216,21 @@ Landfill.on_configuration_changed = Landfill.destroy_prototype_overrides
 --Landfill.on_configuration_changed = Landfill.compute_prototype_overrides
 
 function Landfill.landfill_action(player, event, action)
+	log("landfill_action")
     local bp = Util.get_blueprint(player.cursor_stack)
     if not (bp and bp.is_blueprint_setup()) then
         return
     end
     local prototypes = game.entity_prototypes  -- Save lookups
-    local proto
+    local prototype
 
     -- How many landfilled tiles already existed.  When we convert back to a list of tiles, we subtract the number
     -- of landfilled tiles we process.  If the result is nonzero, we changed something.
     local landfilled_tiles = 0
 
     -- Collect current blueprint info.
-    local ents = bp.get_blueprint_entities()
-    if not ents then
+    local entities = bp.get_blueprint_entities()
+    if not entities then
         player.print({"bpex.landfill_no_entities_in_bp"})
         return
     end
@@ -250,34 +250,32 @@ function Landfill.landfill_action(player, event, action)
     -- Normally, this is +0.5 but rails will mess with it.
     local overrides = Landfill.ALIGNMENT_OVERRIDES
     local offset = 0.5
-    for _, entity in pairs(ents) do
-        proto = prototypes[entity.name]
-        if overrides[proto.type] then
+    for _, entity in pairs(entities) do
+        prototype = prototypes[entity.name]
+        if overrides[prototype.type] then
             offset = 0
             break
         end
     end
 
-
     -- Loop through entities
     local name
     overrides = Landfill.get_prototype_overrides()
     local override
-    local x, y, dir
     local rect
 
-    for _, entity in pairs(ents) do
+    for _, entity in pairs(entities) do
         name = entity.name
-        proto = prototypes[entity.name]
-        if not proto then goto next end
+        prototype = prototypes[entity.name]
+        if not prototype then goto next end
         --if not proto.collision_mask['water-tile'] then goto next end
-        if not requires_landfill(proto) then goto next end
+        if not requires_landfill(prototype) then goto next end
 
-        x = (entity.position.x or 0) + offset
-        y = (entity.position.y or 0) + offset
-        dir = entity.direction or 0
+        local x = (entity.position.x or 0) + offset
+        local y = (entity.position.y or 0) + offset
+        local direction = entity.direction or 0
 
-        override = (overrides and overrides[name] and overrides[name][dir]) or nil
+        override = (overrides and overrides[name] and overrides[name][direction]) or nil
 
         if override then
             for _, source in pairs(override) do
@@ -285,12 +283,12 @@ function Landfill.landfill_action(player, event, action)
                 tilemap = rect:tiles(tilemap, 'landfill')
             end
         else
-            if proto.collision_box then
-                rect = Rect.from_box(proto.collision_box):rotate(dir):translate(x, y)
+            if prototype.collision_box then
+                rect = Rect.from_box(prototype.collision_box):rotate(direction):translate(x, y)
                 tilemap = rect:tiles(tilemap, 'landfill')
             end
-            if proto.secondary_collision_box then
-                rect = Rect.from_box(proto.secondary_collision_box):rotate(dir):translate(x, y)
+            if prototype.secondary_collision_box then
+                rect = Rect.from_box(prototype.secondary_collision_box):rotate(direction):translate(x, y)
                 tilemap = rect:tiles(tilemap, 'landfill')
             end
         end
@@ -327,11 +325,17 @@ function Landfill.landfill_action(player, event, action)
     if not player.clean_cursor() then
         player.print({"bpex.error_cannot_set_stack"})
         return
-    end
+	end
+	
+	--TODO log landfill
+	--log("DEBUG entities:")
+	--log(serpent.block(entities)) --DEBUG
+	--log("DEBUG tiles:")
+	--log(serpent.block(tiles)) --DEBUG
 
     local stack = player.cursor_stack
     stack.set_stack(name)
-    stack.set_blueprint_entities(ents)
+    stack.set_blueprint_entities(entities)
     stack.set_blueprint_tiles(tiles)
     if label then stack.label = label end
     if label_color then stack.label_color = label_color end
@@ -346,6 +350,4 @@ end
 
 
 actions['Kux-BlueprintExtensions_landfill'].handler = Landfill.landfill_action
-
-
 return Landfill
