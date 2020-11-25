@@ -1,5 +1,6 @@
 local actions = require('actions')
 local Util = require('util')
+local mod_gui = require("mod-gui")
 
 local GUI = {}
 

@@ -1,6 +1,6 @@
 local Util = require('util')
 local actions = require('actions')
-require("mod-gui")
+local mod_gui = require("mod-gui")
 
 
 local Flip = {

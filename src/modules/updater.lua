@@ -14,6 +14,13 @@ local Updater = {
 
 }
 
+-- COMPATIBILITY 1.1.0
+local clear_cursor = function(player)
+	if player.clear_cursor then -- renamed in 1.1.0 (from clean_cursor)
+		return player.clear_cursor()
+	end
+	return player.clean_cursor()
+end
 
 function Updater.clone(player, event, action)
     --local player_index = event.player_index
@@ -32,7 +39,7 @@ function Updater.clone(player, event, action)
         status = nil,
     }
     -- Create replacer tool
-    if not player.clean_cursor() then
+    if not clear_cursor(player) then
         return
     end
     Util.get_pdata(player.index).updater = updater
@@ -118,7 +125,6 @@ function Updater.on_gui_opened(event)
     end
 end
 
-
 function Updater.on_player_configured_blueprint(event)
     local pdata = Util.get_pdata(event.player_index)
 --    game.print(serpent.block(pdata.updater))
@@ -127,7 +133,7 @@ function Updater.on_player_configured_blueprint(event)
     end
     pdata.updater = nil  -- Nuke this.
     local player = game.players[event.player_index]
-    if not player.clean_cursor() then
+    if not clear_cursor(player) then
         player.print({"bpex.error_cannot_set_stack"})
     else
         player.cursor_stack.set_stack(Util.fetch_item(event.player_index, 'updater-blueprint'))

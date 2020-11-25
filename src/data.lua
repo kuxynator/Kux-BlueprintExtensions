@@ -52,11 +52,15 @@ for name, action in pairs(actions) do
     end
 end
 
+--COMPATIBILITY 1.1.0 renamed "clean_cursor" to "clear-cursor"
+local clearedCursorProxy_linkedGameControl = "clean_cursor"
+if string.find(mods["base"],"^1%.1%.") then clearedCursorProxy_linkedGameControl = "clear-cursor" end
+
 data:extend({
     {
         type = "custom-input",
         name = "Kux-BlueprintExtensions_cleared_cursor_proxy",
         key_sequence = "",
-        linked_game_control = "clean-cursor"
+        linked_game_control = clearedCursorProxy_linkedGameControl
     }
 })

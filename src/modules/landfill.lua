@@ -4,6 +4,13 @@ local Geom2D = require('geom2d')
 local Rect = Geom2D.Rect
 local actions = require('actions')
 
+-- COMPATIBILITY 1.1.0
+local clear_cursor = function(player)
+	if player.clear_cursor then -- renamed in 1.1.0 (from clean_cursor)
+		return player.clear_cursor()
+	end
+	return player.clean_cursor()
+end
 
 local Landfill = {
     ALIGNMENT_OVERRIDES = require("modules/snap").ALIGNMENT_OVERRIDES,
@@ -322,7 +329,7 @@ function Landfill.landfill_action(player, event, action)
     local label_color = bp.label_color
     name = bp.name
 
-    if not player.clean_cursor() then
+    if not clear_cursor(player) then
         player.print({"bpex.error_cannot_set_stack"})
         return
 	end

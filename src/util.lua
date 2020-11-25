@@ -20,6 +20,22 @@ function Util.get_blueprint(bp)
     return nil
 end
 
+-- will replace Util.get_blueprint
+function Util.tryGetBlueprint(player)
+	local bp = Util.get_blueprint(player.cursor_stack)
+
+	if bp and not bp.is_blueprint_setup() then
+        return nil
+	end
+	
+	-- COMBATIBILIY 1.1.0
+	if player.is_cursor_blueprint and player.is_cursor_blueprint() then -- Returns whether the player is holding a blueprint, it takes into account a blueprint as an item as well as blueprint from the blueprint record from the blueprint library.
+		-- player.get_blueprint_entities() -- array of blueprint entity	Returns the same type of data as LuaItemStack::readBlueprintEntities, but works for the currently selected blueprint, regardless of it being in a blueprint book or picked from the blueprint library.
+		-- TODO no tiles are returned, we have to wait for a better version
+		return player
+	end
+end
+
 -- Create or return a dummy storage surface
 function Util.get_dummy_surface()
     if game.surfaces.surface_of_holding then
