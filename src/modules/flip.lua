@@ -168,30 +168,33 @@ function Flip.flip_action(player, event, action)
                 entity.output_priority = Flip.sides[entity.output_priority]
 			end
 
-			if support_fluid_permutations and entity.recipe then
-				-- TODO support_fluid_permutations
-				local result = FluidPermutation.mirror(entity.recipe)
-				if result then entity.recipe = result end
-			elseif support_gdiw and entity.recipe then
-				-- Support GDIW
-                local t
-                local _, _, recipe, mod = string.find(entity.recipe, "^(.*)%-GDIW%-([BIO])R$")
-                if mod == 'B' then      -- Both mirrored
-                    entity.recipe = recipe
-                elseif mod == 'I' then  -- Input mirrored
-                    entity.recipe = _gdiw_recipe(recipe .. '-GDIW-OR') or recipe
-                elseif mod == 'O' then  -- Output mirrored
-                    entity.recipe = _gdiw_recipe(recipe .. '-GDIW-IR') or recipe
-                else  -- Neither mirrored
-                    recipe = entity.recipe
-                    entity.recipe = (
-                           _gdiw_recipe(recipe .. '-GDIW-BR')
-                        or _gdiw_recipe(recipe .. '-GDIW-IR')
-                        or _gdiw_recipe(recipe .. '-GDIW-OR')
-                        or recipe
-                    )
-                end
+			if entity.recipe then
+				if support_fluid_permutations then
+					-- support fluid_permutations
+					local result = FluidPermutation.flipRecipe(entity.recipe)
+					if result then entity.recipe = result end
+				elseif support_gdiw then
+					-- Support GDIW
+					local t
+					local _, _, recipe, mod = string.find(entity.recipe, "^(.*)%-GDIW%-([BIO])R$")
+					if mod == 'B' then      -- Both mirrored
+						entity.recipe = recipe
+					elseif mod == 'I' then  -- Input mirrored
+						entity.recipe = _gdiw_recipe(recipe .. '-GDIW-OR') or recipe
+					elseif mod == 'O' then  -- Output mirrored
+						entity.recipe = _gdiw_recipe(recipe .. '-GDIW-IR') or recipe
+					else  -- Neither mirrored
+						recipe = entity.recipe
+						entity.recipe = (
+							   _gdiw_recipe(recipe .. '-GDIW-BR')
+							or _gdiw_recipe(recipe .. '-GDIW-IR')
+							or _gdiw_recipe(recipe .. '-GDIW-OR')
+							or recipe
+						)
+					end
+				end
 			end
+
 
         end
         bp.set_blueprint_entities(entities)
