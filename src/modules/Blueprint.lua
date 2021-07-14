@@ -34,11 +34,7 @@ Blueprint.offset = function (obj, xoff, yoff)
     end
 	return t
 	]]
-
 	if type(obj) == "table" and obj.blueprint ~= nil then
-		obj.blueprint["snap-to-grid"] = {x=1,y=1}
-		obj.blueprint["absolute-snapping"] = true
-
 		if obj.blueprint.entities then
 			for _, v in pairs(obj.blueprint.entities) do
 				v.position.x = v.position.x + xoff

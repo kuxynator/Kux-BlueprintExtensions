@@ -8,7 +8,7 @@
 - supports [Fluid Permutations](https://mods.factorio.com/mod/fluid_permutations) as an alternative to [GDIW](https://mods.factorio.com/mod/GDIW)/[GDIW-updated](https://mods.factorio.com/mod/GDIW-updated)
 
 ### Advantages compared to Vanilla
-- Buttons (as alternative to shortcuts) are visible only if a blueprint is selected
+- Tool buttons (as alternative to shortcut buttons) are visible only if a blueprint is selected
 - supports flip the fluid inputs and outputs of buildings (only with mods)
 
 ### Note

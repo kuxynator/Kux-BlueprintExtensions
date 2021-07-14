@@ -29,6 +29,11 @@ local Snap = {
         ['straight-rail'] = 2,
         ['curved-rail'] = 2,
         ['train-stop'] = 2,
+		['rail-signal'] = 2
+    },
+	ALIGNMENT_OVERRIDES_GROUP = { --game.entity_prototypes[].fast_replaceable_group
+        ['rail'] = 2,
+		['rail-signal'] = 2,
     },
     ROTATIONS = {
         [defines.direction.north] = { 1, 2, 3, 4 },
@@ -94,6 +99,16 @@ local function update_bounds(bound, point, min_edge, max_edge)
     bound.max_edge = max(bound.max_edge, max_edge)
 end
 
+function Snap.getAlign(entity)
+	local align = Snap.ALIGNMENT_OVERRIDES[entity.name] or 1
+	if align > 1 then return align end
+
+	local fast_replaceable_group=game.entity_prototypes[entity.name].fast_replaceable_group
+	for name, value in ipairs(Snap.ALIGNMENT_OVERRIDES_GROUP) do
+		if fast_replaceable_group == name then return value end
+	end
+	return 1
+end
 
 function Snap.blueprint_bounds(bp)
 	Log.trace("Snap.blueprint_bounds")
@@ -130,8 +145,8 @@ function Snap.blueprint_bounds(bp)
 
         update_bounds(bounds.x, entity.position.x, x1, x2)
         update_bounds(bounds.y, entity.position.y, y1, y2)
-        align = max(align, Snap.ALIGNMENT_OVERRIDES[entity.name] or align)
-    end
+        if align == 1 then align = max(align, Snap.getAlign(entity) or align) end
+	end
 
     for _, tile in pairs(bp.get_blueprint_tiles() or {}) do
         update_bounds(bounds.x, tile.position.x, -0.5, 0.5)
@@ -142,9 +157,11 @@ function Snap.blueprint_bounds(bp)
     return bounds, align
 end
 
-function Snap.offset_blueprint(bp, xoff, yoff)
+function Snap.offset_blueprint(bp, xoff, yoff, align)
 	local bpt = Blueprint.exportToTable(bp)
 	Blueprint.offset(bpt, xoff, yoff)
+	bpt.blueprint["snap-to-grid"] = {x=align,y=align}
+	bpt.blueprint["absolute-snapping"] = true
 	local result = Blueprint.importFromTable(bp, bpt)
 	--TODO result
 end
@@ -166,13 +183,12 @@ function Snap.align_blueprint(bp, xdir, ydir)
 --    game.print("bounds.y=" .. serpent.line(bounds.y))
 --    game.print("align=" .. align)
 
-
     local xoff = calculate_offset(xdir, bounds.x, align)
     local yoff = calculate_offset(ydir, bounds.y, align)
 
 --    game.print("xoff=" .. xoff .. ", yoff=" .. yoff)
 
-    return Snap.offset_blueprint(bp, xoff, yoff)
+    return Snap.offset_blueprint(bp, xoff, yoff, align)
 end
 
 
@@ -181,13 +197,13 @@ function Snap.nudge_blueprint(bp, xdir, ydir)
     local align = 1
 
     for _, entity in pairs(bp.get_blueprint_entities() or {}) do
-        align = max(align, Snap.ALIGNMENT_OVERRIDES[entity.name] or align)
+        if align == 1 then align = max(align, Snap.getAlign(entity) or align) end
     end
 
     xdir = xdir * align
     ydir = ydir * align
 
-    return Snap.offset_blueprint(bp, xdir, ydir)
+    return Snap.offset_blueprint(bp, xdir, ydir, align)
 end
 
 

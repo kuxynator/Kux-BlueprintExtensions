@@ -52,9 +52,11 @@ for name, action in pairs(actions) do
     end
 end
 
---COMPATIBILITY 1.1.0 renamed "clean_cursor" to "clear-cursor"
-local clearedCursorProxy_linkedGameControl = "clean_cursor"
-if string.find(mods["base"],"^1%.1%.") then clearedCursorProxy_linkedGameControl = "clear-cursor" end
+--COMPATIBILITY 1.1.0 renamed "clean-cursor" to "clear-cursor"
+local clearedCursorProxy_linkedGameControl = "clear-cursor"
+if string.find(mods["base"],"^1%.0%.") then clearedCursorProxy_linkedGameControl = "clean-cursor" end
+
+print(mods["base"], clearedCursorProxy_linkedGameControl)
 
 data:extend({
     {
