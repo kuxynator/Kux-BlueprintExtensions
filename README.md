@@ -2,18 +2,20 @@
 
 *This is a republishing of the fabulous mod [Blueprint Extensions](https://mods.factorio.com/mod/BlueprintExtensions).*
 ### Changes
-- supports Factorio 1.x and 
+- supports Factorio 1.1 and 
+- supports mirroring of Advanced Fluid Handling, Fluid Must Flow, Nullius
 - contains a fix for the crash on selecting a blueprint book
 - repairs blueprint allignment (Num 1..9)
 - supports [Fluid Permutations](https://mods.factorio.com/mod/fluid_permutations) as an alternative to [GDIW](https://mods.factorio.com/mod/GDIW)/[GDIW-updated](https://mods.factorio.com/mod/GDIW-updated)
 
 ### Advantages compared to Vanilla
-- Tool buttons (as alternative to shortcut buttons) are visible only if a blueprint is selected
-- supports flip the fluid inputs and outputs of buildings (only with mods)
+- Tool buttons (left sidebar) (as alternative to shortcut buttons) are visible only if a blueprint is selected
+- supports flipping of fluid inputs/outputs of buildings (with extra mods)
+- allows and fixes flipping and rotating of entities in some mods, which normally cannot be flipped and rotated
 
 ### Note
 Based on Blueprint Extensions 0.5.0 
-Old issues except the above mentioned still exist. I will look what I can do. Suggestions are welcome.
+Old issues except the above mentioned may still exist. Suggestions are welcome.
 For the original description see [Blueprint Extensions](https://mods.factorio.com/mod/BlueprintExtensions)
 
 If anybody has already pullrequest for the orginal mod, or new ideas you can create a new PR at

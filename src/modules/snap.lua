@@ -159,9 +159,12 @@ end
 
 function Snap.offset_blueprint(bp, xoff, yoff, align)
 	local bpt = Blueprint.exportToTable(bp)
+	--print("INPUT:",serpent.block(bpt))
 	Blueprint.offset(bpt, xoff, yoff)
 	bpt.blueprint["snap-to-grid"] = {x=align,y=align}
 	bpt.blueprint["absolute-snapping"] = true
+	bpt.blueprint["position-relative-to-grid"] = nil -- {x=0,y=0}
+	--print("OUTPUT:",serpent.block(bpt))
 	local result = Blueprint.importFromTable(bp, bpt)
 	--TODO result
 end

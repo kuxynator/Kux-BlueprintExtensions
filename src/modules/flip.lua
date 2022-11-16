@@ -110,7 +110,7 @@ OR: IR or none
 BR: unmodified
  ]]
 
-local function _gdiw_recipe(recipe)
+local function getRecipePrototypeOrNil(recipe)
     return (game.recipe_prototypes[recipe]) and recipe or nil
 end
 
@@ -133,7 +133,14 @@ function Flip.flip_action(player, event, action)
             prototype = game.entity_prototypes[entity.name]
             name = (prototype and prototype.type) or entity.name
             direction = entity.direction or 0
-            if name == "curved-rail" then
+            if entity.name:match("duct%-t%-junction") then
+                -- Fluid Must Flow / storage-tank - 
+                if (direction)%4 == 0 and axis == 'y' then
+                    entity.direction = (direction + 4)%8
+                elseif (direction or 0)%4 == 4 and axis == 'x' then
+                    entity.direction = (direction + 4)%8
+                end
+            elseif name == "curved-rail" then
                 entity.direction = (translate.rail_offset - direction)%8
             elseif name == "storage-tank" then
                 if direction == 2 or direction == 6 then
@@ -167,9 +174,31 @@ function Flip.flip_action(player, event, action)
             if Flip.sides[entity.output_priority] then
                 entity.output_priority = Flip.sides[entity.output_priority]
 			end
-
-			if entity.recipe then
-				if support_fluid_permutations then
+            
+            if entity.name:match("^nullius%-") then
+                -- Nullius support
+                local mirrorName;
+                if entity.name:match("^nullius%-mirror%-") then 
+                    mirrorName = "nullius-"..entity.name:sub(16, -1)
+                else
+                    mirrorName = "nullius-mirror-"..entity.name:sub(9, -1)
+                    if game.entity_prototypes[mirrorName] == nil then
+                        player.print("Mirror not available for ".. entity.name)
+                        mirrorName = entity.name -- do not mirror
+                    end
+                end
+                entity.name = mirrorName
+                if entity.name:match("flotation%-cell%-[23]") then
+                    -- FIX for nullius-mirror-flotation-cell-2/3
+                    entity.direction = (direction + 6)%8
+                end
+            elseif entity.name:match("underground%-L%-t[234]%-pipe") and axis == 'x' then
+                -- FIX for Advanced fluid handling
+                entity.direction = (entity.direction + 2)%8
+            elseif entity.name:match("underground%-L%-t[234]%-pipe") and axis == 'y' then
+                entity.direction = (entity.direction + 2)%8
+            elseif entity.recipe then
+                if support_fluid_permutations then
 					-- support fluid_permutations
 					local result = FluidPermutation.flipRecipe(entity.recipe)
 					if result then entity.recipe = result end
@@ -180,22 +209,20 @@ function Flip.flip_action(player, event, action)
 					if mod == 'B' then      -- Both mirrored
 						entity.recipe = recipe
 					elseif mod == 'I' then  -- Input mirrored
-						entity.recipe = _gdiw_recipe(recipe .. '-GDIW-OR') or recipe
+						entity.recipe = getRecipePrototypeOrNil(recipe .. '-GDIW-OR') or recipe
 					elseif mod == 'O' then  -- Output mirrored
-						entity.recipe = _gdiw_recipe(recipe .. '-GDIW-IR') or recipe
+						entity.recipe = getRecipePrototypeOrNil(recipe .. '-GDIW-IR') or recipe
 					else  -- Neither mirrored
 						recipe = entity.recipe
 						entity.recipe = (
-							   _gdiw_recipe(recipe .. '-GDIW-BR')
-							or _gdiw_recipe(recipe .. '-GDIW-IR')
-							or _gdiw_recipe(recipe .. '-GDIW-OR')
+							   getRecipePrototypeOrNil(recipe .. '-GDIW-BR')
+							or getRecipePrototypeOrNil(recipe .. '-GDIW-IR')
+							or getRecipePrototypeOrNil(recipe .. '-GDIW-OR')
 							or recipe
 						)
 					end
 				end
 			end
-
-
         end
         bp.set_blueprint_entities(entities)
     end

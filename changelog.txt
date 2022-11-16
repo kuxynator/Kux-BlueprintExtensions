@@ -1,4 +1,19 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.2.1
+Date: 2022-11-17
+  Bugfixes:
+    - FIX for sidebar does not appear
+---------------------------------------------------------------------------------------------------
+Version: 2.2.0
+Date: 2022-10-13
+  Changes:
+    - ADD support for Nullius mirrored buildings nullius-flotation-cell2, nullius-flotation-cell3, nullius-mirror-flotation-cell2, nullius-mirror-flotation-cell3, 
+    - ADD support for Advanced Fluid Handling: underground-L-t2-pipe, underground-L-t3-pipe, underground-L-t4-pipe
+    - ADD support for Fluid Must Flow: duct-t-junction    
+    - ADD support for blueprint["position-relative-to-grid"]
+  Info:
+    - END of support for Factorio 1.0 and earlier.
+---------------------------------------------------------------------------------------------------
 Version: 2.1.3
 Date: 2021-07-14
   Bugfixes:
