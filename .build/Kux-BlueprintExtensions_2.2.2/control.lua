@@ -1,7 +1,7 @@
-require("__KuxCoreLib__/init")
-require(KuxCoreLib.lua)
-require(KuxCoreLib.Modules)
-require(KuxCoreLib.Log)
+KuxCoreLibPath = "__Kux-CoreLib__/lib/"
+require(KuxCoreLibPath.."lua")
+require(KuxCoreLibPath.."Modules")
+require(KuxCoreLibPath.."Log")
 
 local Util = require('util')
 local mod_gui = require('mod-gui')
@@ -9,7 +9,7 @@ local GUI = require('gui')
 
 if script.active_mods["gvv"] then require("__gvv__.gvv")() end
 
-require(KuxCoreLib.Colors)
+require(KuxCoreLibPath.."Colors")
 require("modules/Blueprint")
 require("modules.FluidPermutation")
 require("modules/Events")
