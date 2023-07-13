@@ -1,9 +1,10 @@
+_G.mod = require("mod") --[[@as mod]]
 --require 'prototypes/inputs'
 require 'prototypes/items'
 --require 'prototypes/style'
 --require 'prototypes/shortcuts'
 
-local actions = require('actions')
+local actions = require('modules/actions')
 
 local function icon(s, x, y)
     return {

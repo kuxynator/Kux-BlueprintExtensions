@@ -1,6 +1,5 @@
-local Util = require('util')
-local actions = require('actions')
-
+local Util = require('modules/util')
+local actions = require('modules/actions')
 
 local Rotate = {}
 
@@ -32,7 +31,7 @@ function Rotate.rotate_action(player, event, action)
 end
 
 
-actions['Kux-BlueprintExtensions_rotate-clockwise'].handler = Rotate.rotate_action
+actions[mod.prefix..'rotate-clockwise'].handler = Rotate.rotate_action
 
 
 return Rotate

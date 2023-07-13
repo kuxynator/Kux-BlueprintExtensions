@@ -19,20 +19,19 @@ function Tempprint.set_temporary(player)
     return true
 end
 
-
-function Tempprint.clear_temporary(player)
-    local pdata = global.playerdata[player.index]
+function Tempprint.clear_temporary(player_index)
+    local pdata = global.playerdata[player_index]
     if not (pdata and pdata.temporary_item) then return end  -- No temporary item to clear
     pdata.temporary_item = nil
     return
 end
 
-
-function Tempprint.nuke_temporary(player)
-    local pdata = global.playerdata[player.index]
+function Tempprint.nuke_temporary(player_index)
+    local pdata = global.playerdata[player_index]
     if not (pdata and pdata.temporary_item) then return end  -- No temporary item to clear
     local tempitem = pdata.temporary_item
 
+	local player = game.players[player_index]
     local stack = player.cursor_stack
     if not (stack.valid and stack.valid_for_read and stack.type == 'blueprint' and stack.item_number ~= 0) then return end
 
@@ -44,22 +43,15 @@ function Tempprint.nuke_temporary(player)
     return true
 end
 
-
-script.on_event(
-        "Kux-BlueprintExtensions_cleared_cursor_proxy",
-        function(event) return Tempprint.nuke_temporary(game.players[event.player_index]) end
-)
-
-
 local function clear_temporary_event(event)
-    return Tempprint.clear_temporary(game.players[event.player_index])
+    return Tempprint.clear_temporary(event.player_index)
 end
 
+script.on_event(mod.prefix.."cleared_cursor_proxy", function(event)
+	return Tempprint.nuke_temporary(event.player_index) end
+)
 
-Tempprint.events = {
-    [defines.events.on_player_configured_blueprint] = clear_temporary_event,
-    [defines.events.on_player_cursor_stack_changed] = clear_temporary_event
-}
-
+EventDistributor.register(defines.events.on_player_configured_blueprint,clear_temporary_event)
+EventDistributor.register(defines.events.on_player_cursor_stack_changed,clear_temporary_event)
 
 return Tempprint

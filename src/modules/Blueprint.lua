@@ -1,4 +1,4 @@
-Blueprint = {}
+local Blueprint = {}
 
 --- Exports a blueprint to a table
 --@param bp [LuaItemStack]
@@ -106,3 +106,5 @@ end
 	}
 }
 ]]
+
+return Blueprint

@@ -1,51 +1,62 @@
+---@class Action
+---@field name string
+---@field icon integer
+---@field key_sequence string
+---@field order string
+---@field visibility_setting string
+---@field data any
+---@field shortcut_style string
+---@field handler function
+
 --- Actions for shortcut bar/etc.
+---@type {string: Action}
 local actions = {
-    ["Kux-BlueprintExtensions_flip-h"] = {
+    [mod.prefix.."flip-h"] = {
         icon = 0,
         key_sequence = "SHIFT + X",
         order = 'a-a',
-        visibility_setting = 'Kux-BlueprintExtensions_show-mirror',
+        visibility_setting = mod.prefix.."show-mirror",
         data = 'h',
         shortcut_style = 'blue',
     },
-    ["Kux-BlueprintExtensions_flip-v"] = {
+    [mod.prefix.."flip-v"] = {
         icon = 1,
         key_sequence = "SHIFT + V",
         order = 'a-b',
-        visibility_setting = 'Kux-BlueprintExtensions_show-mirror',
+        visibility_setting = mod.prefix.."show-mirror",
         data = 'v',
         shortcut_style = 'blue',
     },
-    ["Kux-BlueprintExtensions_rotate-clockwise"] = {
+    [mod.prefix.."rotate-clockwise"] = {
         icon = 2,
         key_sequence = "CONTROL + ALT + R",
         order = 'a-c',
-        visibility_setting = 'Kux-BlueprintExtensions_show-rotate',
+        visibility_setting = mod.prefix.."show-rotate",
         data = false,
         shortcut_style = 'blue',
     },
-    ["Kux-BlueprintExtensions_clone-blueprint"] = {
+    [mod.prefix.."clone-blueprint"] = {
         icon = 3,
         key_sequence = "SHIFT + U",
         order = 'c-a',
-        visibility_setting = 'Kux-BlueprintExtensions_show-clone',
+        visibility_setting = mod.prefix.."show-clone",
         shortcut_style = 'green',
     },
-    ["Kux-BlueprintExtensions_wireswap"] = {
+    [mod.prefix.."wireswap"] = {
         icon = 4,
         key_sequence = "CONTROL + ALT + W",
         order = 'c-b',
-        visibility_setting = 'Kux-BlueprintExtensions_show-wireswap',
+        visibility_setting = mod.prefix.."show-wireswap",
         shortcut_style = 'blue',
     },
-    ["Kux-BlueprintExtensions_landfill"] = {
+    [mod.prefix.."landfill"] = {
         icon = 5,
         key_sequence = "CONTROL + ALT + L",
         order = 'c-c',
-        visibility_setting = 'Kux-BlueprintExtensions_show-landfill',
+        visibility_setting = mod.prefix.."show-landfill",
         shortcut_style = 'blue',
     },
-    ["Kux-BlueprintExtensions_snap-center"] = {
+    [mod.prefix.."snap-center"] = {
         key_sequence = "PAD 5",
         order = 'f-a',
         data = 'center',
@@ -66,20 +77,20 @@ for ix, t in pairs({
     local d = t[1]
     local key = t[2]
 
-    actions["Kux-BlueprintExtensions_snap-" .. d] = {
+    actions[mod.prefix.."snap-" .. d] = {
         key_sequence = "PAD " .. key,
         order = 'd-' .. ix,
         data = d,
     }
 
-    actions["Kux-BlueprintExtensions_nudge-" .. d] = {
+    actions[mod.prefix.."nudge-" .. d] = {
         key_sequence = "CONTROL + PAD " .. key,
         order = 'e-' .. ix,
         data = d,
     }
 end
 
-actions["Kux-BlueprintExtensions_snap-center"] = {
+actions[mod.prefix.."snap-center"] = {
     key_sequence = "PAD 5",
     order = 'f-a',
     data = 'center',

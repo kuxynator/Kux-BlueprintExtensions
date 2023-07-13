@@ -1,8 +1,8 @@
 -- Capabilities related to updating blueprints.
-local Util = require("util")
-local actions = require("actions")
+local Util = require("modules/util")
+local actions = require("modules/actions")
 
-local CLONED_BLUEPRINT = "Kux-BlueprintExtensions_cloned-blueprint"
+local CLONED_BLUEPRINT = mod.prefix.."cloned-blueprint"
 local VERSION_PATTERN = "(v[.]?)(%d)$"  -- Matches version number at end of blueprints.
 local DEFAULT_VERSION = " v.2"
 
@@ -88,7 +88,7 @@ function Updater.on_selected_area(event)
         local label = updater.label
         local found
         local versioning = player.mod_settings[
-            alt and "Kux-BlueprintExtensions_alt-version-increment" or "Kux-BlueprintExtensions_version-increment"
+            alt and mod.prefix.."alt-version-increment" or mod.prefix.."version-increment"
         ].value
         if versioning ~= 'off' then
             label, found = string.gsub(label, VERSION_PATTERN, function(v, n) return v .. (n+1) end)
@@ -141,15 +141,11 @@ function Updater.on_player_configured_blueprint(event)
 end
 
 
-actions['Kux-BlueprintExtensions_clone-blueprint'].handler = Updater.clone
+actions[mod.prefix..'clone-blueprint'].handler = Updater.clone
 
-
-Updater.events = {
-    [defines.events.on_player_selected_area] = Updater.on_selected_area,
-    [defines.events.on_player_alt_selected_area] = Updater.on_selected_area,
-    [defines.events.on_player_configured_blueprint] = Updater.on_player_configured_blueprint,
-    [defines.events.on_gui_opened] = Updater.on_gui_opened,
-}
-
+EventDistributor.register(defines.events.on_player_selected_area,Updater.on_selected_area)
+EventDistributor.register(defines.events.on_player_alt_selected_area,Updater.on_selected_area)
+EventDistributor.register(defines.events.on_player_configured_blueprint,Updater.on_player_configured_blueprint)
+EventDistributor.register(defines.events.on_gui_opened,Updater.on_gui_opened)
 
 return Updater

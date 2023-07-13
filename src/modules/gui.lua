@@ -1,5 +1,5 @@
-local actions = require('actions')
-local Util = require('util')
+local actions = require('modules/actions')
+local Util = require('modules/util')
 local mod_gui = require("mod-gui")
 
 local GUI = {}
@@ -11,9 +11,7 @@ for _, action in pairs(actions) do
 end
 table.sort(sorted_actions, function(a, b) return a.order < b.order end)
 
-
 GUI.sorted_actions = sorted_actions
-
 
 function GUI.setup(player)
     --log("GUI.setup")
@@ -45,7 +43,6 @@ function GUI.setup(player)
 
     return buttonFlow
 end
-
 
 function GUI.update_visibility(player, force)
     --log("GUI.update_visibility")
@@ -81,6 +78,5 @@ function GUI.update_visibility(player, force)
 
     pdata.buttons_enabled = showButtonFlow
 end
-
 
 return GUI

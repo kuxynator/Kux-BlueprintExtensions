@@ -1,8 +1,8 @@
-local Util = require("util")
-local Tempprint = require('modules/tempprint')
-local Geom2D = require('geom2d')
+local Util = require("modules/util")
+local Tempprint = require('actions/tempprint')
+local Geom2D = require('modules/geom2d')
 local Rect = Geom2D.Rect
-local actions = require('actions')
+local actions = require('modules/actions')
 
 -- COMPATIBILITY 1.1.0
 local clear_cursor = function(player)
@@ -13,20 +13,17 @@ local clear_cursor = function(player)
 end
 
 local Landfill = {
-    ALIGNMENT_OVERRIDES = require("modules/snap").ALIGNMENT_OVERRIDES,
+    ALIGNMENT_OVERRIDES = require("actions/snap").ALIGNMENT_OVERRIDES,
     prototypes_computed = false
 }
 
-
 local adjust_box = Geom2D.adjust_box
 local get_overlapping_tiles = Geom2D.get_overlapping_tiles
-
 
 local function requires_landfill(prototype)
     local m = prototype.collision_mask
     return (m and (m['water-tile'] or m['item-layer'])) and true or false
 end
-
 
 function Landfill.compute_prototype_overrides()
     --if Landfill.prototypes_computed then
@@ -357,4 +354,9 @@ end
 
 
 actions['Kux-BlueprintExtensions_landfill'].handler = Landfill.landfill_action
+
+EventDistributor.register("on_init",Landfill.on_init)
+EventDistributor.register("on_load",Landfill.on_load)
+EventDistributor.register("on_configuration_changed",Landfill.on_configuration_changed)
+
 return Landfill

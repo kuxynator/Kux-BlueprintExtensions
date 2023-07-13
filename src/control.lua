@@ -1,76 +1,62 @@
-require("__Kux-CoreLib__/init")
-require(KuxCoreLib.lua)
-require(KuxCoreLib.Modules)
-require(KuxCoreLib.Log)
+_G.mod = require("mod") --[[@as mod]]
 
-local Util = require('util')
-local mod_gui = require('mod-gui')
-local GUI = require('gui')
+require("modules/bootstrap")
 
-if script.active_mods["gvv"] then require("__gvv__.gvv")() end
+local Util = require('modules/util')
+local GUI = require('modules/gui')
 
-require(KuxCoreLib.Colors)
-require("modules/Blueprint")
-require("modules.FluidPermutation")
-require("modules/Events")
+local actions = require("modules/actions")
 
-Modules.Snap = require('modules/snap')
-Modules.Updater = require('modules/updater')
-Modules.Flip = require('modules/flip')
-Modules.Wireswap = require('modules/wireswap')
-Modules.Rotate = require('modules/rotate')
-Modules.Tempprint = require('modules/tempprint')
-Modules.Landfill = require('modules/landfill')
+--init actions
+require('actions/snap')
+require('actions/updater')
+require('actions/flip')
+require('actions/wireswap')
+require('actions/rotate')
+require('actions/tempprint')
+require('actions/landfill')
 
-Events.initModules()
-
-local function init_globals()
-    global.playerdata = global.playerdata or {}
+local function dispatch_action(event, action)
+    if not action or not action.handler then return end
+	local player = game.players[event.player_index]
+	global.player = player
+    return action.handler(player, event, action)
 end
 
---#region bootstrap
+local function on_input_event(event)
+    return dispatch_action(event, actions[event.input_name])
+end
 
-script.on_init(function()
-    -- FIXME: Update all gui and shortcut bars.
-    init_globals()
-	Modules.on_init()
+for name, action in pairs(actions) do
+	if action.handler then
+		script.on_event(name, on_input_event)
+	else
+		log("Warning: No action handler defined for " .. name)
+	end
+end
+
+EventDistributor.register(defines.events.on_gui_click,function(event)
+	return dispatch_action(event, actions[event.element.name])
 end)
 
-script.on_load(function()
-	Modules.on_load()
+EventDistributor.register(defines.events.on_lua_shortcut, function(event)
+	return dispatch_action(event, actions[event.prototype_name])
 end)
 
-script.on_configuration_changed(function(e)
-    -- FIXME: Update all gui and shortcut bars.
-    init_globals()
-	Modules.on_configuration_changed(e)
-end)
-
---#end region
-
-Events.add(defines.events.on_gui_click,	function(event)
-	return Events.dispatch_action(event, event.element.name)
-end)
-
-Events.add(defines.events.on_lua_shortcut, function(event)
-	return Events.dispatch_action(event, event.prototype_name)
-end)
-
-Events.add(defines.events.on_player_removed, function(e)
+EventDistributor.register(defines.events.on_player_removed, function(e)
     --call_module_methods('on_player_removed', event)
     Util.clear_all_items(e.player_index)
     global.playerdata[e.player_index] = nil
 end)
 
-Events.add(defines.events.on_player_cursor_stack_changed, function(e)
+EventDistributor.register(defines.events.on_player_cursor_stack_changed, function(e)
 	GUI.update_visibility(game.players[e.player_index])
 end)
 
-Events.add(defines.events.on_runtime_mod_setting_changed, function(e)
-	Modules.call('on_runtime_mod_setting_changed', e)
+EventDistributor.register(defines.events.on_runtime_mod_setting_changed, function(e)
     if not (
             e.setting_type == 'runtime-per-user'
-            and string.find(e.setting, "Kux-BlueprintExtensions_show-", 1, true) == 1
+            and string.find(e.setting, mod.prefix.."show-", 1, true) == 1
     ) then
         return
     end
@@ -78,8 +64,8 @@ Events.add(defines.events.on_runtime_mod_setting_changed, function(e)
 end)
 
 
-Events.add(defines.events.on_player_created, function(event)
+EventDistributor.register(defines.events.on_player_created, function(event)
     GUI.setup(game.players[event.player_index])
 end)
 
-Events.setup()
+

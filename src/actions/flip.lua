@@ -1,7 +1,7 @@
-local Util = require('util')
-local actions = require('actions')
+local Util = require('modules/util')
+local actions = require('modules/actions')
 local mod_gui = require("mod-gui")
-
+local FluidPermutation = require("modules/FluidPermutation")
 
 local Flip = {
     translations = {

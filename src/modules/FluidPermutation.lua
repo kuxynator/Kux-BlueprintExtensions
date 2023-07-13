@@ -1,4 +1,4 @@
-FluidPermutation = {}
+local FluidPermutation = {}
 
 FluidPermutation.isAvailable = script.active_mods["fluid_permutations"] ~= nil
 
@@ -13,3 +13,5 @@ FluidPermutation.flipRecipe = function(recipeName)
 	end
 	return iif(success, v, nil )
 end
+
+return FluidPermutation

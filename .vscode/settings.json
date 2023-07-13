@@ -7,6 +7,10 @@
 		"remote",
 		"iif",
 		"mods",
-		"data"
+		"data",
+		"serpent"
+	],
+	"Lua.workspace.library": [
+		"../Kux-CoreLib/src/lib"
 	]
 }

@@ -1,5 +1,7 @@
-local Util = require("util")
-local actions = require("actions")
+local Util = require("modules/util")
+local actions = require("modules/actions")
+local Blueprint = require("modules/Blueprint")
+
 local min, max = math.min, math.max
 
 

@@ -1,10 +1,10 @@
-local Util = require('util')
-local actions = require('actions')
+local util = require('modules/util')
+local actions = require('modules/actions')
 
 local Wireswap = {}
 
 function Wireswap.swap(player, event, action)
-    local bp = Util.get_blueprint(player.cursor_stack)
+    local bp = util.get_blueprint(player.cursor_stack)
     if not (bp and bp.is_blueprint_setup()) then
         return
     end
@@ -26,7 +26,7 @@ function Wireswap.swap(player, event, action)
     end
 end
 
-actions["Kux-BlueprintExtensions_wireswap"].handler = Wireswap.swap
+actions[mod.prefix.."wireswap"].handler = Wireswap.swap
 
 --script.on_event("Kux-BlueprintExtensions_wireswap", function(event) return Wireswap.swap(game.players[event.player_index]) end)
 
