@@ -1,4 +1,4 @@
-require("__Kux-CoreLib__/init")
+require("__Kux-CoreLib__/lib/init")
 
 ---@class mod : KuxCoreLib.ModInfo
 local mod = setmetatable(

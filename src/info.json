@@ -1,6 +1,6 @@
 {
     "name": "Kux-BlueprintExtensions",
-    "version": "2.2.5",
+    "version": "2.3.1",
     "title": "Blueprint Extensions (Kux Edition)",
     "author": "kuxynator",
     "factorio_version": "1.1",
@@ -15,5 +15,5 @@
 		"(?) nullius",
 		"! BlueprintExtensions"
 	],
-    "description": "Adds tools for updating and placing blueprints.\nRepublish of BlueprintExtensions with fixes."
+    "description": "Adds tools for updating and placing blueprints.\nSupports Advanced fluid handling, GDIW, Fluid Must Flow, and Nullius."
 }

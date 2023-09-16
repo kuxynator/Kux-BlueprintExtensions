@@ -3,8 +3,23 @@ local actions = require('modules/actions')
 local mod_gui = require("mod-gui")
 local FluidPermutation = require("modules/FluidPermutation")
 
+
+---@class Translation
+---@field axis string
+---@field rail_offset number
+---@field default_offset number
+---@field signals table<number, number>
+---@field train_stops table<number, number>
+
+---@class Translations
+---@field v Translation
+---@field h Translation
+
+---@class Flip
 local Flip = {
+	---@type Translations
     translations = {
+		---@type Translation
         v = {
             axis = 'y',
             rail_offset = 13,
@@ -22,6 +37,7 @@ local Flip = {
                 [6] = 2
             },
         },
+		---@type Translation
         h = {
             axis = 'x',
             rail_offset = 9,
@@ -40,6 +56,7 @@ local Flip = {
             },
         }
     },
+	---@type table<"left"|"right", string>
     sides = {
         left = 'right',
         right = 'left'
@@ -114,8 +131,12 @@ local function getRecipePrototypeOrNil(recipe)
     return (game.recipe_prototypes[recipe]) and recipe or nil
 end
 
+---@param player LuaPlayer
+---@param event table
+---@param action Action
 function Flip.flip_action(player, event, action)
-    local translate = Flip.translations[action.data]
+	print("Flip.flip_action "..action.data)
+    local translate = Flip.translations[action.data] --[[@as Translation]]
     local bp = Util.get_blueprint(player.cursor_stack)
     if not (bp and bp.is_blueprint_setup()) then
         return
@@ -123,16 +144,17 @@ function Flip.flip_action(player, event, action)
 
     local prototype, name, direction
 	local axis = translate.axis
-    local entities
 	local support_gdiw = player.mod_settings["Kux-BlueprintExtensions_support-gdiw"].value
 	local support_fluid_permutations = player.mod_settings["Kux-BlueprintExtensions_support-fluid_permutations"].value and FluidPermutation.isAvailable
 
-    entities = bp.get_blueprint_entities()
+    local entities = bp.get_blueprint_entities()
     if entities then
-        for _,entity in pairs(entities) do
+        for _,entity in pairs(entities) do ---@cast entity LuaEntity			
             prototype = game.entity_prototypes[entity.name]
             name = (prototype and prototype.type) or entity.name
             direction = entity.direction or 0
+			local axisEquDirection = (axis == 'x' and (direction%4 == 0 or direction%4 == 2)) or (axis == 'y' and (direction%4 == 1 or direction%4 == 3))
+			print("  "..entity.name.." "..(entity.direction or 0).." "..(entity.recipe or "no recipe").." axis: "..axis .." match direction: "..tostring(axisEquDirection))
             if entity.name:match("duct%-t%-junction") then
                 -- Fluid Must Flow / storage-tank - 
                 if (direction)%4 == 0 and axis == 'y' then
@@ -174,11 +196,11 @@ function Flip.flip_action(player, event, action)
             if Flip.sides[entity.output_priority] then
                 entity.output_priority = Flip.sides[entity.output_priority]
 			end
-            
+-- Nullius
             if entity.name:match("^nullius%-") then
                 -- Nullius support
                 local mirrorName;
-                if entity.name:match("^nullius%-mirror%-") then 
+                if entity.name:match("^nullius%-mirror%-") then
                     mirrorName = "nullius-"..entity.name:sub(16, -1)
                 else
                     mirrorName = "nullius-mirror-"..entity.name:sub(9, -1)
@@ -192,11 +214,67 @@ function Flip.flip_action(player, event, action)
                     -- FIX for nullius-mirror-flotation-cell-2/3
                     entity.direction = (direction + 6)%8
                 end
-            elseif entity.name:match("underground%-L%-t[234]%-pipe") and axis == 'x' then
-                -- FIX for Advanced fluid handling
-                entity.direction = (entity.direction + 2)%8
-            elseif entity.name:match("underground%-L%-t[234]%-pipe") and axis == 'y' then
-                entity.direction = (entity.direction + 2)%8
+--Advanced fluid handling
+			elseif(entity.name:match("%-overflow%-valve") or entity.name:match("%-top%-up%-valve") or entity.name=="check-valve") then
+				if (direction==0 or direction==6) and axis == "y" then
+					entity.direction = (entity.direction + 2)%8
+				elseif (direction==2 or direction==4) and axis == "y" then
+					entity.direction = (entity.direction - 2)%8
+				elseif (direction==0 or direction==6) and axis == "x" then
+					entity.direction = (entity.direction - 2)%8
+				elseif (direction==2 or direction==4) and axis == "x" then
+					entity.direction = (entity.direction + 2)%8
+				end
+			elseif entity.name:match("underground%-L%-.-pipe") then
+				entity.direction = (entity.direction + 2)%8
+			elseif entity.name:match("^one%-to%-.-left.-%-pipe$") and (axis == 'y') ~= axisEquDirection then
+                entity.name = entity.name:gsub("left", "right")
+			elseif entity.name:match("^one%-to%-.-right.-%-pipe$") and (axis == 'y') ~= axisEquDirection then
+                entity.name = entity.name:gsub("right", "left")
+			elseif entity.name:match("^one%-to%-.-L%-RR.-%-pipe$") and (axis == 'y') ~= axisEquDirection then
+                entity.name = entity.name:gsub("L%-RR", "L-RL")
+			elseif entity.name:match("^one%-to%-.-L%-RL.-%-pipe$") and (axis == 'y') ~= axisEquDirection then
+                entity.name = entity.name:gsub("L%-RL", "L-RR")
+			elseif entity.name:match("^one%-to%-.-forward.-%-pipe$") and (axis == 'y') == axisEquDirection then
+                entity.name = entity.name:gsub("forward", "reverse")
+			elseif entity.name:match("^one%-to%-.-reverse.-%-pipe$") and (axis == 'y') == axisEquDirection then
+                entity.name = entity.name:gsub("reverse", "forward")
+			elseif entity.name:match("^one%-to%-.-perdicular.-%-pipe$") and (axis == 'y') == axisEquDirection then
+                entity.name = entity.name:gsub("perdicular", "parallel-secondary")
+			elseif entity.name:match("^one%-to%-.-parallel5-secondary.-%-pipe$") and (axis == 'y') == axisEquDirection then
+                entity.name = entity.name:gsub("parallel%-secondary", "perdicular")
+
+-- Flow control + Space Exploration-Flow Control Bridge, Flow Control for Bob's Logistics
+			elseif(entity.name=="pipe-junction" or entity.name=="space-pipe-t-junction" or entity.name:match("^pipe%-.-junction$")) then
+				if (direction==0 or direction==6) and axis == "y" then
+					entity.direction = (entity.direction + 2)%8
+				elseif (direction==2 or direction==4) and axis == "y" then
+					entity.direction = (entity.direction - 2)%8
+				elseif (direction==0 or direction==6) and axis == "x" then
+					entity.direction = (entity.direction - 2)%8
+				elseif (direction==2 or direction==4) and axis == "x" then
+					entity.direction = (entity.direction + 2)%8
+				end
+			elseif(entity.name=="pipe-elbow" or entity.name=="space-pipe-elbow" or entity.name:match("^pipe%-.-elbow$")) then
+				if(axis == "y" and (direction==0 or direction==6)) then
+					entity.direction = (entity.direction + 4)%8
+				elseif(axis == "x" and (direction==2 or direction==4)) then
+					entity.direction = (entity.direction + 4)%8
+				end
+			elseif(entity.name=="pipe-straight" or (entity.name=="space-pipe-straight") or entity.name:match("^pipe%-.-straight$")) then
+				entity.direction = (entity.direction + 2)%8
+			elseif(entity.name=="overflow-valve" or entity.name=="top%-up%-valve"
+				or (entity.name=="flowbob-check-valve" or entity.name=="flowbob-overflow-valve" or entity.name=="flowbob-topup-valve-1" or entity.name=="flowbob-topup-valve-2")) then
+				if (direction==0 or direction==6) and axis == "y" then
+					entity.direction = (entity.direction + 2)%8
+				elseif (direction==2 or direction==4) and axis == "y" then
+					entity.direction = (entity.direction - 2)%8
+				elseif (direction==0 or direction==6) and axis == "x" then
+					entity.direction = (entity.direction - 2)%8
+				elseif (direction==2 or direction==4) and axis == "x" then
+					entity.direction = (entity.direction + 2)%8
+				end
+-- recipe flipping
             elseif entity.recipe then
                 if support_fluid_permutations then
 					-- support fluid_permutations

@@ -1,12 +1,20 @@
+
+
 ---@class Action
 ---@field name string
 ---@field icon integer
 ---@field key_sequence string
 ---@field order string
 ---@field visibility_setting string
----@field data any
+---@field data "h"|"v"|false|"center"|"n"|"e"|"s"|"w"|"nw"|"ne"|"sw"|"se"
 ---@field shortcut_style string
 ---@field handler function
+
+--name is automatical assigned by the table key
+--icon is the index of the icon in the sprite sheet
+--handler is assigned later
+
+---@diagnostic disable: missing-fields
 
 --- Actions for shortcut bar/etc.
 ---@type {string: Action}
