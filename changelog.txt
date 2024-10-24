@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 2.3.2
+Date: 2024-06-04
+  Features:
+    - Support for Fluid Permutations forks which use the same interface name
+---------------------------------------------------------------------------------------------------
 Version: 2.3.1
 Date: 2023-09-16
   Features:
@@ -33,9 +38,9 @@ Date: 2022-11-17
 Version: 2.2.0
 Date: 2022-10-13
   Changes:
-    - ADD support for Nullius mirrored buildings nullius-flotation-cell2, nullius-flotation-cell3, nullius-mirror-flotation-cell2, nullius-mirror-flotation-cell3, 
+    - ADD support for Nullius mirrored buildings nullius-flotation-cell2, nullius-flotation-cell3, nullius-mirror-flotation-cell2, nullius-mirror-flotation-cell3,
     - ADD support for Advanced Fluid Handling: underground-L-t2-pipe, underground-L-t3-pipe, underground-L-t4-pipe
-    - ADD support for Fluid Must Flow: duct-t-junction    
+    - ADD support for Fluid Must Flow: duct-t-junction
     - ADD support for blueprint["position-relative-to-grid"]
   Info:
     - END of support for Factorio 1.0 and earlier.

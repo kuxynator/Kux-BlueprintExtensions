@@ -1,6 +1,8 @@
 local FluidPermutation = {}
 
-FluidPermutation.isAvailable = script.active_mods["fluid_permutations"] ~= nil
+--FluidPermutation.isAvailable = script.active_mods["fluid_permutations"] ~= nil
+--FluidPermutation.isAvailable = script.active_mods["fluid_permutations_fixed"] ~= nil
+FluidPermutation.isAvailable = remote.interfaces["fluid_permutations"] ~= nil
 
 FluidPermutation.flipRecipe = function(recipeName)
 	local v = nil
