@@ -11,24 +11,18 @@ local ceil = math.ceil
 -- Generate transforms for rotations
 local d = defines.direction
 
--- x = x*t[1] + y*t[2]
--- y = x*t[3] + y*t[4]
 local rotations = {
-    [d.north]     = { 1,  0,  0,  1 },  -- No change
-    [d.northeast] = {-1,  0,  0,  1 },  -- Mirror on X axis.
+    [d.north]     = { 1,  0,  0,  1 },   -- Keine Änderung
+    [d.northeast] = {-1,  0,  0,  1 },   -- Spiegelung an der X-Achse
+    [d.east]      = { 0, -1,  1,  0 },   -- 90° Drehung
+    [d.southeast] = { 0, -1, -1,  0 },   -- 90° Drehung und Spiegelung
+    [d.south]     = {-1,  0,  0, -1 },   -- 180° Drehung
+    [d.southwest] = { 1,  0,  0, -1 },   -- Spiegelung an der Y-Achse
+    [d.west]      = { 0,  1, -1,  0 },   -- 270° Drehung
+    [d.northwest] = { 0,  1,  1,  0 }    -- 270° Drehung und Spiegelung
 }
--- Compute the rest of the rotations.
-do
-    local t
-    for i = d.east, d.northwest do
-        t = rotations[i-2]
-        rotations[i] = { -t[3], -t[4], t[1], t[2] }
-    end
-end
-
 
 Geom2D.rotations = rotations
-
 
 local Rect = {}
 do

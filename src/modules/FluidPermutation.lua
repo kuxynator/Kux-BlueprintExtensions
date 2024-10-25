@@ -10,7 +10,7 @@ FluidPermutation.flipRecipe = function(recipeName)
 		v = remote.call("fluid_permutations", "flip_recipe", recipeName)
 	end)
 	if not success then
-		global.player.print("Kux-BlueprintExtension: Fluid Permutations communication error! see logfile.", Colors.lightred)
+		storage.player.print("Kux-BlueprintExtension: Fluid Permutations communication error! see logfile.", Colors.lightred)
 		log(ex)
 	end
 	return iif(success, v, nil )

@@ -33,7 +33,7 @@ local Snap = {
         ['train-stop'] = 2,
 		['rail-signal'] = 2
     },
-	ALIGNMENT_OVERRIDES_GROUP = { --game.entity_prototypes[].fast_replaceable_group
+	ALIGNMENT_OVERRIDES_GROUP = { --prototypes.entity[].fast_replaceable_group
         ['rail'] = 2,
 		['rail-signal'] = 2,
     },
@@ -105,7 +105,7 @@ function Snap.getAlign(entity)
 	local align = Snap.ALIGNMENT_OVERRIDES[entity.name] or 1
 	if align > 1 then return align end
 
-	local fast_replaceable_group=game.entity_prototypes[entity.name].fast_replaceable_group
+	local fast_replaceable_group=prototypes.entitys[entity.name].fast_replaceable_group
 	for name, value in ipairs(Snap.ALIGNMENT_OVERRIDES_GROUP) do
 		if fast_replaceable_group == name then return value end
 	end
@@ -114,7 +114,7 @@ end
 
 function Snap.blueprint_bounds(bp)
 	Log.trace("Snap.blueprint_bounds")
-    local prototypes = game.entity_prototypes
+    local prototypes = prototypes.entity
 
     local bounds = {
         x = { min_edge = nil, min = nil, mid = nil, max_edge = nil, max = nil },

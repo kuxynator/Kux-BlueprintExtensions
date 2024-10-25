@@ -5,7 +5,7 @@ local Rotate = {}
 
 local function transform(ents)
     for _,ent in pairs(ents) do
-        ent.direction = ((ent.direction or 0) + 2) % 8
+        ent.direction = isV1 and ((ent.direction or 0) + 2) % 8 or ((ent.direction or 0) + 4) % 16
 	    ent.position.x, ent.position.y = ent.position.y * -1, ent.position.x * 1
     end
     return ents

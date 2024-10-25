@@ -57,7 +57,7 @@ function Landfill.compute_prototype_overrides()
     local surface = game.create_surface("_BPEX_Temp_Surface")
     local x, y
 
-    for name, proto in pairs(game.entity_prototypes) do
+    for name, proto in pairs(prototypes.entity) do
         if (
                 (not type_blacklist[proto.type])
                 and proto.flags and proto.flags["building-direction-8-way"]
@@ -101,14 +101,14 @@ function Landfill.compute_prototype_overrides()
 
     log("...done.")
 
-    global.prototype_overrides = results
+    storage.prototype_overrides = results
     Landfill.prototype_overrides = results
 end
 
 
 function Landfill.get_prototype_overrides()
-    if global.prototype_overrides then
-        return global.prototype_overrides
+    if storage.prototype_overrides then
+        return storage.prototype_overrides
     end
 
     -- Some entities require special arguments when created.  We skip those; they're unlikely to come up in blueprints
@@ -137,7 +137,7 @@ function Landfill.get_prototype_overrides()
     local surface = game.create_surface("_BPEX_Temp_Surface")
     local x, y
 
-    for name, proto in pairs(game.entity_prototypes) do
+    for name, proto in pairs(prototypes.entity) do
         if (
                 (not type_blacklist[proto.type])
                         and proto.flags and proto.flags["building-direction-8-way"]
@@ -181,13 +181,13 @@ function Landfill.get_prototype_overrides()
 
     log("...done.")
 
-    global.prototype_overrides = results
+    storage.prototype_overrides = results
     Landfill.prototype_overrides = results
     return results
 end
 
 function Landfill.on_load()
-    Landfill.prototype_overrides = global.prototype_overrides
+    Landfill.prototype_overrides = storage.prototype_overrides
     if Landfill.prototype_overrides then
         for ent, dirs in pairs(Landfill.prototype_overrides) do
             for dir, rects in pairs(dirs) do
@@ -201,7 +201,7 @@ end
 
 function Landfill.destroy_prototype_overrides()
     log("Destroying previous cached prototype information")
-    global.prototype_overrides = nil
+    storage.prototype_overrides = nil
     Landfill.prototype_overrides = nil
 end
 
@@ -225,7 +225,7 @@ function Landfill.landfill_action(player, event, action)
     if not (bp and bp.is_blueprint_setup()) then
         return
     end
-    local prototypes = game.entity_prototypes  -- Save lookups
+    local prototypes = prototypes.entity  -- Save lookups
     local prototype
 
     -- How many landfilled tiles already existed.  When we convert back to a list of tiles, we subtract the number
@@ -330,7 +330,7 @@ function Landfill.landfill_action(player, event, action)
         player.print({"bpex.error_cannot_set_stack"})
         return
 	end
-	
+
 	--TODO log landfill
 	--log("DEBUG entities:")
 	--log(serpent.block(entities)) --DEBUG

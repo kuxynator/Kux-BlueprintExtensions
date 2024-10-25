@@ -27,7 +27,7 @@ function Util.tryGetBlueprint(player)
 	if bp and not bp.is_blueprint_setup() then
         return nil
 	end
-	
+
 	-- COMBATIBILIY 1.1.0
 	if player.is_cursor_blueprint and player.is_cursor_blueprint() then -- Returns whether the player is holding a blueprint, it takes into account a blueprint as an item as well as blueprint from the blueprint record from the blueprint library.
 		-- player.get_blueprint_entities() -- array of blueprint entity	Returns the same type of data as LuaItemStack::readBlueprintEntities, but works for the currently selected blueprint, regardless of it being in a blueprint book or picked from the blueprint library.
@@ -44,7 +44,7 @@ function Util.get_dummy_surface()
 
     local none = { frequency = "none" }
     local autoplace_controls = {}
-    for k,_ in pairs(game.autoplace_control_prototypes) do
+    for k,_ in pairs(prototypes.autoplace_control) do
         autoplace_controls[k] = none
     end
     return game.create_surface(
@@ -69,7 +69,7 @@ end
 
 -- Clear an item stack in the Surface of Holding(tm)
 function Util.clear_item(player_index, key)
-    local pdata = global.playerdata[player_index]
+    local pdata = storage.playerdata[player_index]
     if not pdata or not pdata.stored_items or not pdata.stored_items[key] then
         return
     end
@@ -81,7 +81,7 @@ end
 
 -- Clear ALL item stacks in the Surface of Holding
 function Util.clear_all_items(player_index)
-    local pdata = global.playerdata[player_index]
+    local pdata = storage.playerdata[player_index]
     if not pdata or not pdata.stored_items then
         return
     end
@@ -95,7 +95,7 @@ end
 
 -- Fetch an item stack in the Surface of Holding(tm)
 function Util.fetch_item(player_index, key)
-    local pdata = global.playerdata[player_index]
+    local pdata = storage.playerdata[player_index]
     if not pdata or not pdata.stored_items or not pdata.stored_items[key] then
         return nil
     end
@@ -108,10 +108,10 @@ end
 
 -- Get or initialize player data.
 function Util.get_pdata(player_index)
-    local pdata = global.playerdata[player_index]
+    local pdata = storage.playerdata[player_index]
     if not pdata then
         pdata = {}
-        global.playerdata[player_index] = pdata
+        storage.playerdata[player_index] = pdata
     end
     return pdata
 end

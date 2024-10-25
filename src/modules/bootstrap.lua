@@ -1,5 +1,5 @@
 local function init_globals()
-    global.playerdata = global.playerdata or {}
+    storage.playerdata = storage.playerdata or {}
 end
 
 local function on_init()

@@ -8,10 +8,10 @@ function Tempprint.set_temporary(player)
 
     if not (stack.valid and stack.valid_for_read and stack.type == 'blueprint' and stack.item_number ~= 0) then return end
 
-    local pdata = global.playerdata[player.index]
+    local pdata = storage.playerdata[player.index]
     if not pdata then
         pdata = {}
-        global.playerdata[player.index] = pdata
+        storage.playerdata[player.index] = pdata
     end
 
     pdata.temporary_item = {name=stack.name, item_number=stack.item_number}
@@ -20,14 +20,14 @@ function Tempprint.set_temporary(player)
 end
 
 function Tempprint.clear_temporary(player_index)
-    local pdata = global.playerdata[player_index]
+    local pdata = storage.playerdata[player_index]
     if not (pdata and pdata.temporary_item) then return end  -- No temporary item to clear
     pdata.temporary_item = nil
     return
 end
 
 function Tempprint.nuke_temporary(player_index)
-    local pdata = global.playerdata[player_index]
+    local pdata = storage.playerdata[player_index]
     if not (pdata and pdata.temporary_item) then return end  -- No temporary item to clear
     local tempitem = pdata.temporary_item
 

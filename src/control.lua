@@ -19,7 +19,7 @@ require('actions/landfill')
 local function dispatch_action(event, action)
     if not action or not action.handler then return end
 	local player = game.players[event.player_index]
-	global.player = player
+	storage.player = player
     return action.handler(player, event, action)
 end
 
@@ -46,7 +46,7 @@ end)
 EventDistributor.register(defines.events.on_player_removed, function(e)
     --call_module_methods('on_player_removed', event)
     Util.clear_all_items(e.player_index)
-    global.playerdata[e.player_index] = nil
+    storage.playerdata[e.player_index] = nil
 end)
 
 EventDistributor.register(defines.events.on_player_cursor_stack_changed, function(e)

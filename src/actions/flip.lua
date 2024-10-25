@@ -3,6 +3,28 @@ local actions = require('modules/actions')
 local mod_gui = require("mod-gui")
 local FluidPermutation = require("modules/FluidPermutation")
 
+local N = defines.direction.north
+local E = defines.direction.east
+local S = defines.direction.south
+local W = defines.direction.west
+
+local Xaxis = 0
+local Yaxis = 1
+
+local numWays = isV1 and 8 or 16
+
+local function direction4(direction)
+	local div = isV1 and 2 or 4
+    return math.ceil(direction / div - 0.5) % 4
+end
+local function axis(direction) return direction4(direction) %2 end
+local function isXAxisDirection(direction) return direction4(direction) %2 == 0 end
+local function isYAxisDirection(direction) return direction4(direction) %2 == 1 end
+local function turn90(direction) return isV1 and (direction + 2)%8 or (direction + 4)%16 end
+local function turn180(direction) return isV1 and (direction + 4)%8 or (direction + 8)%16 end
+local function turn270(direction) return isV1 and (direction + 6)%8 or (direction + 12)%16 end
+local function isNorS(direction) return isV1 and direction % 4 == 0 or direction % 8 == 0 end
+local function isEorW(direction) return isV1 and direction % 4 == 2 or direction % 8 == 4 end
 
 ---@class Translation
 ---@field axis string
@@ -20,42 +42,41 @@ local Flip = {
 	---@type Translations
     translations = {
 		---@type Translation
-        v = {
-            axis = 'y',
-            rail_offset = 13,
-            default_offset = 12,
-            signals = {
-                [1] = 7,
-                [2] = 6,
-                [3] = 5,
-                [5] = 3,
-                [6] = 2,
-                [7] = 1
-            },
-            train_stops = {
-                [2] = 6,
-                [6] = 2
-            },
-        },
-		---@type Translation
-        h = {
-            axis = 'x',
-            rail_offset = 9,
-            default_offset = 16,
-            signals = {
-                [0] = 4,
-                [1] = 3,
-                [3] = 1,
-                [4] = 0,
-                [5] = 7,
-                [7] = 5
-            },
-            train_stops = {
-                [0] = 4,
-                [4] = 1,
-            },
-        }
-    },
+		v = {
+			axis = 'y',
+			rail_offset = isV1 and 13 or 26,
+			default_offset = isV1 and 12 or 24,
+			signals = {
+				[1] = isV1 and 7 or 14,
+				[2] = isV1 and 6 or 12,
+				[3] = isV1 and 5 or 10,
+				[5] = isV1 and 3 or 6,
+				[6] = isV1 and 2 or 4,
+				[7] = isV1 and 1 or 2
+			},
+			train_stops = {
+				[2] = isV1 and 6 or 12,
+				[6] = isV1 and 2 or 4
+			},
+		},
+		h = {
+			axis = 'x',
+			rail_offset = isV1 and 9 or 18,
+			default_offset = isV1 and 16 or 32,
+			signals = {
+				[0] = isV1 and 4 or 8,
+				[1] = isV1 and 3 or 6,
+				[3] = isV1 and 1 or 2,
+				[4] = isV1 and 0 or 0,
+				[5] = isV1 and 7 or 14,
+				[7] = isV1 and 5 or 10
+			},
+			train_stops = {
+				[0] = isV1 and 4 or 8,
+				[4] = isV1 and 1 or 2
+			},
+		},
+	},
 	---@type table<"left"|"right", string>
     sides = {
         left = 'right',
@@ -128,7 +149,7 @@ BR: unmodified
  ]]
 
 local function getRecipePrototypeOrNil(recipe)
-    return (game.recipe_prototypes[recipe]) and recipe or nil
+    return (prototypes.recipe[recipe]) and recipe or nil
 end
 
 ---@param player LuaPlayer
@@ -149,27 +170,23 @@ function Flip.flip_action(player, event, action)
 
     local entities = bp.get_blueprint_entities()
     if entities then
-        for _,entity in pairs(entities) do ---@cast entity LuaEntity			
-            prototype = game.entity_prototypes[entity.name]
+        for _,entity in pairs(entities) do ---@cast entity LuaEntity
+            prototype = prototypes.entity[entity.name]
             name = (prototype and prototype.type) or entity.name
             direction = entity.direction or 0
 			local axisEquDirection = (axis == 'x' and (direction%4 == 0 or direction%4 == 2)) or (axis == 'y' and (direction%4 == 1 or direction%4 == 3))
 			print("  "..entity.name.." "..(entity.direction or 0).." "..(entity.recipe or "no recipe").." axis: "..axis .." match direction: "..tostring(axisEquDirection))
             if entity.name:match("duct%-t%-junction") then
-                -- Fluid Must Flow / storage-tank - 
-                if (direction)%4 == 0 and axis == 'y' then
-                    entity.direction = (direction + 4)%8
-                elseif (direction or 0)%4 == 4 and axis == 'x' then
-                    entity.direction = (direction + 4)%8
+                -- Fluid Must Flow / storage-tank -
+                if isNorS(direction) and axis == 'y' then
+					entity.direction = turn180(direction)
+                elseif isEorW(direction) and axis == 'x' then
+                    entity.direction = turn180(direction)
                 end
-            elseif name == "curved-rail" then
-                entity.direction = (translate.rail_offset - direction)%8
+            elseif name == "curved-rail" or name == "curved-rail-a" or name == "curved-rail-b" then
+                entity.direction = (translate.rail_offset - direction)%numWays
             elseif name == "storage-tank" then
-                if direction == 2 or direction == 6 then
-                    entity.direction = 4
-                else
-                    entity.direction = 2
-                end
+				entity.direction = isEorW(direction) and S or E
             elseif name == "rail-signal" or name == "rail-chain-signal" then
                 if translate.signals[direction] ~= nil then
                     entity.direction = translate.signals[direction]
@@ -179,7 +196,7 @@ function Flip.flip_action(player, event, action)
                     entity.direction = translate.train_stops[direction]
                 end
             else
-                entity.direction = (translate.default_offset - direction)%8
+                entity.direction = (translate.default_offset - direction)%numWays
             end
 
             entity.position[axis] = -entity.position[axis]
@@ -204,7 +221,7 @@ function Flip.flip_action(player, event, action)
                     mirrorName = "nullius-"..entity.name:sub(16, -1)
                 else
                     mirrorName = "nullius-mirror-"..entity.name:sub(9, -1)
-                    if game.entity_prototypes[mirrorName] == nil then
+                    if prototypes.entity[mirrorName] == nil then
                         player.print("Mirror not available for ".. entity.name)
                         mirrorName = entity.name -- do not mirror
                     end
@@ -212,21 +229,21 @@ function Flip.flip_action(player, event, action)
                 entity.name = mirrorName
                 if entity.name:match("flotation%-cell%-[23]") then
                     -- FIX for nullius-mirror-flotation-cell-2/3
-                    entity.direction = (direction + 6)%8
+                    entity.direction = turn270(direction)
                 end
 --Advanced fluid handling
 			elseif(entity.name:match("%-overflow%-valve") or entity.name:match("%-top%-up%-valve") or entity.name=="check-valve") then
-				if (direction==0 or direction==6) and axis == "y" then
-					entity.direction = (entity.direction + 2)%8
-				elseif (direction==2 or direction==4) and axis == "y" then
-					entity.direction = (entity.direction - 2)%8
-				elseif (direction==0 or direction==6) and axis == "x" then
-					entity.direction = (entity.direction - 2)%8
-				elseif (direction==2 or direction==4) and axis == "x" then
-					entity.direction = (entity.direction + 2)%8
+				if     (direction==N or direction==W) and axis == "y" then
+					entity.direction = turn90(entity.direction)
+				elseif (direction==E or direction==S) and axis == "y" then
+					entity.direction = turn270(entity.direction)
+				elseif (direction==N or direction==W) and axis == "x" then
+					entity.direction = turn270(entity.direction)
+				elseif (direction==E or direction==S) and axis == "x" then
+					entity.direction = turn90(entity.direction)
 				end
 			elseif entity.name:match("underground%-L%-.-pipe") then
-				entity.direction = (entity.direction + 2)%8
+				entity.direction = turn90(entity.direction)
 			elseif entity.name:match("^one%-to%-.-left.-%-pipe$") and (axis == 'y') ~= axisEquDirection then
                 entity.name = entity.name:gsub("left", "right")
 			elseif entity.name:match("^one%-to%-.-right.-%-pipe$") and (axis == 'y') ~= axisEquDirection then
@@ -246,14 +263,14 @@ function Flip.flip_action(player, event, action)
 
 -- Flow control + Space Exploration-Flow Control Bridge, Flow Control for Bob's Logistics
 			elseif(entity.name=="pipe-junction" or entity.name=="space-pipe-t-junction" or entity.name:match("^pipe%-.-junction$")) then
-				if (direction==0 or direction==6) and axis == "y" then
-					entity.direction = (entity.direction + 2)%8
-				elseif (direction==2 or direction==4) and axis == "y" then
-					entity.direction = (entity.direction - 2)%8
-				elseif (direction==0 or direction==6) and axis == "x" then
-					entity.direction = (entity.direction - 2)%8
-				elseif (direction==2 or direction==4) and axis == "x" then
-					entity.direction = (entity.direction + 2)%8
+				if     (direction==N or direction==W) and axis == "y" then
+					entity.direction = turn90(entity.direction)
+				elseif (direction==E or direction==S) and axis == "y" then
+					entity.direction = turn270(entity.direction)
+				elseif (direction==N or direction==W) and axis == "x" then
+					entity.direction = turn270(entity.direction)
+				elseif (direction==E or direction==S) and axis == "x" then
+					entity.direction = turn90(entity.direction)
 				end
 			elseif(entity.name=="pipe-elbow" or entity.name=="space-pipe-elbow" or entity.name:match("^pipe%-.-elbow$")) then
 				if(axis == "y" and (direction==0 or direction==6)) then
@@ -265,14 +282,14 @@ function Flip.flip_action(player, event, action)
 				entity.direction = (entity.direction + 2)%8
 			elseif(entity.name=="overflow-valve" or entity.name=="top%-up%-valve"
 				or (entity.name=="flowbob-check-valve" or entity.name=="flowbob-overflow-valve" or entity.name=="flowbob-topup-valve-1" or entity.name=="flowbob-topup-valve-2")) then
-				if (direction==0 or direction==6) and axis == "y" then
-					entity.direction = (entity.direction + 2)%8
-				elseif (direction==2 or direction==4) and axis == "y" then
-					entity.direction = (entity.direction - 2)%8
-				elseif (direction==0 or direction==6) and axis == "x" then
-					entity.direction = (entity.direction - 2)%8
-				elseif (direction==2 or direction==4) and axis == "x" then
-					entity.direction = (entity.direction + 2)%8
+				if     (direction==N or direction==W) and axis == "y" then
+					entity.direction = turn90(entity.direction)
+				elseif (direction==E or direction==S) and axis == "y" then
+					entity.direction = turn270(entity.direction)
+				elseif (direction==N or direction==W) and axis == "x" then
+					entity.direction = turn270(entity.direction)
+				elseif (direction==E or direction==S) and axis == "x" then
+					entity.direction = turn90(entity.direction)
 				end
 -- recipe flipping
             elseif entity.recipe then

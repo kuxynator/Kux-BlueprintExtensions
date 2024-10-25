@@ -6,16 +6,38 @@ require 'prototypes/items'
 
 local actions = require('modules/actions')
 
-local function icon(s, x, y)
+---create a SpritePrototype
+---@param size any
+---@param x any
+---@param y any
+---@return SpritePrototype
+local function sprite(size, x, y)
     return {
-        filename = "__Kux-BlueprintExtensions__/graphics/shortcut-bar-buttons-" .. s .. ".png",
+        filename = "__Kux-BlueprintExtensions__/graphics/shortcut-bar-buttons-" .. size .. ".png",
         priority = "extra-high-no-scale",
         flags = { "icon" },
-        size = s,
-        x = s*(x or 0),
-        y = s*(y or 0),
+        size = size,
+        x = size*(x or 0),
+        y = size*(y or 0),
         scale = 1
     }
+end
+
+---Create IconData[]
+---@param size any
+---@param x any
+---@param y any
+---@return IconData[]
+local function icons(size, x, y)
+	if isV1 then error "not supported" end
+    return {{
+        icon = "__Kux-BlueprintExtensions__/graphics/shortcut-bar-buttons-" .. size .. ".png",
+        icon_size = size,
+		shift = {size*(x or 0),size*(y or 0)},
+        scale = 1
+		-- tint             optional	:: Color
+		-- draw_background  optional	:: bool
+    }}
 end
 
 for name, action in pairs(actions) do
@@ -29,26 +51,41 @@ for name, action in pairs(actions) do
     end
 
     if action.icon ~= nil then
-        local sprite = icon(32, action.icon, 1)
+        local sprite = sprite(32, action.icon, 1)
         sprite.type = "sprite"
         sprite.name = name
 
+		local shortcut = --[[@as ShortcutPrototype]] isV1 and {
+			name = name,
+			type = "shortcut",
+			localised_name = { "controls." .. name },
+			associated_control_input = (action.key_sequence and name or nil),
+			action = "lua",
+			toggleable = action.toggleable or false,
+			icon = sprite(32, action.icon, 1),
+			disabled_icon = sprite(32, action.icon, 0),
+			small_icon = sprite(24, action.icon, 1),
+			disabled_small_icon = sprite(24, action.icon, 0),
+			style = action.shortcut_style,
+			order = "b[blueprints]-x[bpex]-" .. action.order
+		} or { -- V2
+			-- TODO FACTORIO 2.0 test
+			name = name,
+			type = "shortcut",
+			localised_name = { "controls." .. name },
+			associated_control_input = (action.key_sequence and name or nil),
+			action = "lua",
+			toggleable = action.toggleable or false,
+			icons = icons(32, action.icon, 1),
+			small_icons = icons(24, action.icon, 1),
+			style = action.shortcut_style,
+			order = "b[blueprints]-x[bpex]-" .. action.order
+		}
+		--log("sortcut '"..shortcut.name.."' => ".. serpent.block(shortcut))
+
         data:extend {
             sprite,
-            {
-                name = name,
-                type = "shortcut",
-                localised_name = { "controls." .. name },
-                associated_control_input = (action.key_sequence and name or nil),
-                action = "lua",
-                toggleable = action.toggleable or false,
-                icon = icon(32, action.icon, 1),
-                disabled_icon = icon(32, action.icon, 0),
-                small_icon = icon(24, action.icon, 1),
-                disabled_small_icon = icon(24, action.icon, 0),
-                style = action.shortcut_style,
-                order = "b[blueprints]-x[bpex]-" .. action.order
-            }
+            shortcut
         }
     end
 end
@@ -67,3 +104,10 @@ data:extend({
         linked_game_control = clearedCursorProxy_linkedGameControl
     }
 })
+
+if isV2 then
+	data.raw["gui-style"].default["slot_table_spacing_vertical_flow"] = {
+		type = "vertical_flow_style",
+		vertical_spacing = 0  -- Stelle den vertikalen Abstand auf den gewünschten Wert ein
+	}
+end

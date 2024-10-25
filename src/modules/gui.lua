@@ -46,10 +46,10 @@ end
 
 function GUI.update_visibility(player, force)
     --log("GUI.update_visibility")
-    local pdata = global.playerdata[player.index]
+    local pdata = storage.playerdata[player.index]
     if not pdata then
         pdata = {}
-        global.playerdata[player.index] = pdata
+        storage.playerdata[player.index] = pdata
     end
 
     local bp = (Util.get_blueprint(player.cursor_stack))
