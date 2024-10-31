@@ -2,31 +2,36 @@
 
 local Util = {}
 
--- Returns the item if it is a blueprint, the selected blueprint in the book if it is a blueprint book, or nil.
+--- @class Updater
+--- @field name string
+--- @field label string
+--- @field icons table
+--- @field status any
+
+--- @class PlayerData
+--- @field updater Updater
+--TODO define
+
+--- Returns the item if it is a blueprint, the selected blueprint in the book if it is a blueprint book, or nil.
+--- @param bp LuaItemStack?
+--- @return LuaItemStack?
 function Util.get_blueprint(bp)
-    if not (bp and bp.valid and bp.valid_for_read) then
-        return nil
-    end
+    if not (bp and bp.valid and bp.valid_for_read) then return nil end
     if bp.is_blueprint_book and bp.active_index then
         local inventory = bp.get_inventory(defines.inventory.item_main)
-        if inventory.get_item_count() == 0 then
-            return nil
-        end
+		if not inventory then return nil end
+        if inventory.get_item_count() == 0 then return nil end
         return Util.get_blueprint(inventory[bp.active_index])
     end
-    if bp.is_blueprint then
-        return bp
-    end
-    return nil
+    if not bp.is_blueprint then return nil end
+    return bp
 end
 
--- will replace Util.get_blueprint
+--- will replace Util.get_blueprint
+--- @param player LuaPlayer
 function Util.tryGetBlueprint(player)
 	local bp = Util.get_blueprint(player.cursor_stack)
-
-	if bp and not bp.is_blueprint_setup() then
-        return nil
-	end
+	if bp and not bp.is_blueprint_setup() then return nil end
 
 	-- COMBATIBILIY 1.1.0
 	if player.is_cursor_blueprint and player.is_cursor_blueprint() then -- Returns whether the player is holding a blueprint, it takes into account a blueprint as an item as well as blueprint from the blueprint record from the blueprint library.
@@ -36,7 +41,7 @@ function Util.tryGetBlueprint(player)
 	end
 end
 
--- Create or return a dummy storage surface
+--- Create or return a dummy storage surface
 function Util.get_dummy_surface()
     if game.surfaces.surface_of_holding then
         return game.surfaces.surface_of_holding
@@ -106,11 +111,17 @@ function Util.fetch_item(player_index, key)
     return
 end
 
--- Get or initialize player data.
+
+
+--- Get or initialize player data.
+--- @param player_index integer
+--- @return PlayerData
 function Util.get_pdata(player_index)
     local pdata = storage.playerdata[player_index]
     if not pdata then
-        pdata = {}
+        pdata = {
+
+		}
         storage.playerdata[player_index] = pdata
     end
     return pdata
