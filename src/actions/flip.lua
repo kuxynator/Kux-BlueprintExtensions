@@ -8,18 +8,7 @@ local E = defines.direction.east
 local S = defines.direction.south
 local W = defines.direction.west
 
-local Xaxis = 0
-local Yaxis = 1
-
 local numWays = isV1 and 8 or 16
-
-local function direction4(direction)
-	local div = isV1 and 2 or 4
-    return math.ceil(direction / div - 0.5) % 4
-end
-local function axis(direction) return direction4(direction) %2 end
-local function isXAxisDirection(direction) return direction4(direction) %2 == 0 end
-local function isYAxisDirection(direction) return direction4(direction) %2 == 1 end
 local function turn90(direction) return isV1 and (direction + 2)%8 or (direction + 4)%16 end
 local function turn180(direction) return isV1 and (direction + 4)%8 or (direction + 8)%16 end
 local function turn270(direction) return isV1 and (direction + 6)%8 or (direction + 12)%16 end
@@ -152,6 +141,11 @@ local function getRecipePrototypeOrNil(recipe)
     return (prototypes.recipe[recipe]) and recipe or nil
 end
 
+local function flipPosition(position, axis)
+	local idx = (#position == 2) and ((axis == "x") and 1 or 2) or axis
+	position[idx] = -position[idx]
+end
+
 ---@param player LuaPlayer
 ---@param event table
 ---@param action Action
@@ -164,7 +158,7 @@ function Flip.flip_action(player, event, action)
     end
 
     local prototype, name, direction
-	local axis = translate.axis
+	local axis = translate.axis; print("  axis: "..tostring(axis))
 	local support_gdiw = player.mod_settings["Kux-BlueprintExtensions_support-gdiw"].value
 	local support_fluid_permutations = player.mod_settings["Kux-BlueprintExtensions_support-fluid_permutations"].value and FluidPermutation.isAvailable
 
@@ -174,7 +168,9 @@ function Flip.flip_action(player, event, action)
             prototype = prototypes.entity[entity.name]
             name = (prototype and prototype.type) or entity.name
             direction = entity.direction or 0
-			local axisEquDirection = (axis == 'x' and (direction%4 == 0 or direction%4 == 2)) or (axis == 'y' and (direction%4 == 1 or direction%4 == 3))
+			local numWays = isV1 and 8 or 16
+			local axisEquDirection = (axis == 'x' and (direction % (numWays / 2) == 0 or direction % (numWays / 2) == (numWays / 4)))
+                      or (axis == 'y' and (direction % (numWays / 2) == (numWays / 8) or direction % (numWays / 2) == (3 * numWays / 8)))
 			print("  "..entity.name.." "..(entity.direction or 0).." "..(entity.recipe or "no recipe").." axis: "..axis .." match direction: "..tostring(axisEquDirection))
             if entity.name:match("duct%-t%-junction") then
                 -- Fluid Must Flow / storage-tank -
@@ -201,10 +197,10 @@ function Flip.flip_action(player, event, action)
 
             entity.position[axis] = -entity.position[axis]
             if entity.drop_position ~= nil then
-                entity.drop_position[axis] = -entity.drop_position[axis]
+				flipPosition(entity.drop_position, axis)
             end
             if entity.pickup_position ~= nil then
-                entity.pickup_position[axis] = -entity.pickup_position[axis]
+				flipPosition(entity.pickup_position, axis)
             end
 
             if Flip.sides[entity.input_priority] then
@@ -273,10 +269,10 @@ function Flip.flip_action(player, event, action)
 					entity.direction = turn90(entity.direction)
 				end
 			elseif(entity.name=="pipe-elbow" or entity.name=="space-pipe-elbow" or entity.name:match("^pipe%-.-elbow$")) then
-				if(axis == "y" and (direction==0 or direction==6)) then
-					entity.direction = (entity.direction + 4)%8
-				elseif(axis == "x" and (direction==2 or direction==4)) then
-					entity.direction = (entity.direction + 4)%8
+				if(axis == "y" and (direction==N or direction==W)) then
+					entity.direction = turn180(entity.direction)
+				elseif(axis == "x" and (direction==E or direction==S)) then
+					entity.direction = turn180(entity.direction)
 				end
 			elseif(entity.name=="pipe-straight" or (entity.name=="space-pipe-straight") or entity.name:match("^pipe%-.-straight$")) then
 				entity.direction = (entity.direction + 2)%8
