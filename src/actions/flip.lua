@@ -2,6 +2,7 @@ local Util = require('modules/util')
 local actions = require('modules/actions')
 local mod_gui = require("mod-gui")
 local FluidPermutation = require("modules/FluidPermutation")
+local Table = KuxCoreLib.Table
 
 local N = defines.direction.north
 local E = defines.direction.east
@@ -72,6 +73,8 @@ local Flip = {
         right = 'left'
     },
 }
+
+local railNames = Table.toFlagsDictionary{"curved-rail", "curved-rail-a", "curved-rail-b","half-diagonal-rail","elevated-curved-rail", "elevated-curved-rail-a", "elevated-curved-rail-b","elevated-half-diagonal-rail","legacy-curved-rai"}
 
 --function Flip.setup_gui(player)
 --    local show = (player.mod_settings["BlueprintExtensions_show-buttons"].value)
@@ -179,7 +182,7 @@ function Flip.flip_action(player, event, action)
                 elseif isEorW(direction) and axis == 'x' then
                     entity.direction = turn180(direction)
                 end
-            elseif name == "curved-rail" or name == "curved-rail-a" or name == "curved-rail-b" then
+            elseif railNames[name] then
                 entity.direction = (translate.rail_offset - direction)%numWays
             elseif name == "storage-tank" then
 				entity.direction = isEorW(direction) and S or E
