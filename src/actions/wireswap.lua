@@ -4,10 +4,8 @@ local actions = require('modules/actions')
 local Wireswap = {}
 
 function Wireswap.swap(player, event, action)
-    local bp = util.get_blueprint(player.cursor_stack)
-    if not (bp and bp.is_blueprint_setup()) then
-        return
-    end
+    local bp = util.get_blueprint(player)
+    if not bp then return end
 
     local ents = bp.get_blueprint_entities()
 

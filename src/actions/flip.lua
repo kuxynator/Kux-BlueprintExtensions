@@ -74,7 +74,7 @@ local Flip = {
     },
 }
 
-local railNames = Table.toFlagsDictionary{"curved-rail", "curved-rail-a", "curved-rail-b","half-diagonal-rail","elevated-curved-rail", "elevated-curved-rail-a", "elevated-curved-rail-b","elevated-half-diagonal-rail","legacy-curved-rai"}
+local railNames = Table.toFlagsDictionary{"curved-rail", "curved-rail-a", "curved-rail-b","half-diagonal-rail","elevated-curved-rail", "elevated-curved-rail-a", "elevated-curved-rail-b","elevated-half-diagonal-rail","legacy-curved-rail"}
 
 --function Flip.setup_gui(player)
 --    local show = (player.mod_settings["BlueprintExtensions_show-buttons"].value)
@@ -155,19 +155,16 @@ end
 function Flip.flip_action(player, event, action)
 	print("Flip.flip_action "..action.data)
     local translate = Flip.translations[action.data] --[[@as Translation]]
-    local bp = Util.get_blueprint(player.cursor_stack)
-    if not (bp and bp.is_blueprint_setup()) then
-        return
-    end
-
+    local bp = Util.get_blueprint(player); if not bp then return end
     local prototype, name, direction
 	local axis = translate.axis; print("  axis: "..tostring(axis))
 	local support_gdiw = player.mod_settings["Kux-BlueprintExtensions_support-gdiw"].value
 	local support_fluid_permutations = player.mod_settings["Kux-BlueprintExtensions_support-fluid_permutations"].value and FluidPermutation.isAvailable
 
     local entities = bp.get_blueprint_entities()
+	print(serpent.block(entities))
     if entities then
-        for _,entity in pairs(entities) do ---@cast entity LuaEntity
+        for _,entity in pairs(entities) do ---@cast entity BlueprintEntity
             prototype = prototypes.entity[entity.name]
             name = (prototype and prototype.type) or entity.name
             direction = entity.direction or 0
@@ -212,7 +209,7 @@ function Flip.flip_action(player, event, action)
             if Flip.sides[entity.output_priority] then
                 entity.output_priority = Flip.sides[entity.output_priority]
 			end
--- Nullius
+		-- Nullius
             if entity.name:match("^nullius%-") then
                 -- Nullius support
                 local mirrorName;
@@ -230,7 +227,7 @@ function Flip.flip_action(player, event, action)
                     -- FIX for nullius-mirror-flotation-cell-2/3
                     entity.direction = turn270(direction)
                 end
---Advanced fluid handling
+		--Advanced fluid handling
 			elseif(entity.name:match("%-overflow%-valve") or entity.name:match("%-top%-up%-valve") or entity.name=="check-valve") then
 				if     (direction==N or direction==W) and axis == "y" then
 					entity.direction = turn90(entity.direction)
@@ -260,7 +257,7 @@ function Flip.flip_action(player, event, action)
 			elseif entity.name:match("^one%-to%-.-parallel5-secondary.-%-pipe$") and (axis == 'y') == axisEquDirection then
                 entity.name = entity.name:gsub("parallel%-secondary", "perdicular")
 
--- Flow control + Space Exploration-Flow Control Bridge, Flow Control for Bob's Logistics
+		-- Flow control + Space Exploration-Flow Control Bridge, Flow Control for Bob's Logistics
 			elseif(entity.name=="pipe-junction" or entity.name=="space-pipe-t-junction" or entity.name:match("^pipe%-.-junction$")) then
 				if     (direction==N or direction==W) and axis == "y" then
 					entity.direction = turn90(entity.direction)
@@ -290,7 +287,7 @@ function Flip.flip_action(player, event, action)
 				elseif (direction==E or direction==S) and axis == "x" then
 					entity.direction = turn90(entity.direction)
 				end
--- recipe flipping
+		-- recipe flipping
             elseif entity.recipe then
                 if support_fluid_permutations then
 					-- support fluid_permutations
@@ -318,19 +315,18 @@ function Flip.flip_action(player, event, action)
 				end
 			end
         end
-        bp.set_blueprint_entities(entities)
+        if bp.valid_for_write then bp.set_blueprint_entities(entities)
+		else return end --TODO create a new blueprint
     end
 
-    entities = bp.get_blueprint_tiles()
-    if entities then
-        for _,ent in pairs(entities) do
-            ent.direction = (
-                translate.default_offset
-                - (ent.direction or 0)
-            )%8
-            ent.position[axis] = -ent.position[axis]
+    local tiles = bp.get_blueprint_tiles()
+    if tiles then
+        for _,tile in pairs(tiles) do
+            --tile.direction = (translate.default_offset- (tile.direction or 0))%8
+            tile.position[axis] = -tile.position[axis]
         end
-        bp.set_blueprint_tiles(entities)
+        if bp.valid_for_write then bp.set_blueprint_tiles(tiles)
+		else return end --TODO create a new blueprint
     end
 end
 

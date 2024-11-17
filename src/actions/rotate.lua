@@ -17,10 +17,8 @@ end
 
 
 function Rotate.rotate_action(player, event, action)
-    local bp = Util.get_blueprint(player.cursor_stack)
-    if not (bp and bp.is_blueprint_setup()) then
-        return
-    end
+    local bp = Util.get_blueprint(player)
+    if not bp then return end
 
     local ents
     ents = bp.get_blueprint_entities()

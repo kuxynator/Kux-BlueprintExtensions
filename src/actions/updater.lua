@@ -59,7 +59,7 @@ function Updater.clone(player, event, action)
     --local player_index = event.player_index
     --local player = game.players[player_index]
     if not player.valid then return end                     -- return
-    local bp = Util.get_blueprint(player.cursor_stack)
+    local bp = Util.get_blueprint(player)
     if not bp then return end                               -- return
 	-- LuaItemStack "[LuaItemStack: 1x {blueprint, normal}]"
 	local item = bp.item; if not item then return end       -- return

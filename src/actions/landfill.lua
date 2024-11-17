@@ -221,10 +221,8 @@ Landfill.on_configuration_changed = Landfill.destroy_prototype_overrides
 
 function Landfill.landfill_action(player, event, action)
 	log("landfill_action")
-    local bp = Util.get_blueprint(player.cursor_stack)
-    if not (bp and bp.is_blueprint_setup()) then
-        return
-    end
+    local bp = Util.get_blueprint(player)
+    if not bp then return end
     local prototypes = prototypes.entity  -- Save lookups
     local prototype
 

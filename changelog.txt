@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 3.3.7
+  Changes:
+    - supports writable bluprint from bluprint library again (was disabled in Factorio 1.1)
+    - but blueprint books and read-only blueprints (player lubrary) are still not (yet) supported
+---------------------------------------------------------------------------------------------------
 Version: 3.3.6
 Date: 2024-11-16
   Bugfixes:

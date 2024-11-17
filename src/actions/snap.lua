@@ -51,10 +51,8 @@ local Snap = {
 
 function Snap.on_nudge_action(player, event, action)
 	Log.trace("Snap.on_nudge_action")
-    local bp = Util.get_blueprint(player.cursor_stack)
-    if not bp then
-        return nil
-    end
+    local bp = Util.get_blueprint(player)
+    if not bp then return nil end
 
     local xdir, ydir = table.unpack(Snap.NUDGES[action.data])
     return Snap.nudge_blueprint(bp, xdir, ydir)
@@ -63,10 +61,8 @@ end
 
 function Snap.on_snap_action(player, event, action)
 	Log.trace("Snap.on_snap_action")
-    local bp = Util.get_blueprint(player.cursor_stack)
-    if not bp then
-        return nil
-    end
+    local bp = Util.get_blueprint(player)
+    if not bp then return nil end
 
     local player_settings = player.mod_settings
     local center = (player_settings["Kux-BlueprintExtensions_cardinal-center"].value and 0.5) or nil
@@ -105,7 +101,7 @@ function Snap.getAlign(entity)
 	local align = Snap.ALIGNMENT_OVERRIDES[entity.name] or 1
 	if align > 1 then return align end
 
-	local fast_replaceable_group=prototypes.entitys[entity.name].fast_replaceable_group
+	local fast_replaceable_group=prototypes.entity[entity.name].fast_replaceable_group
 	for name, value in ipairs(Snap.ALIGNMENT_OVERRIDES_GROUP) do
 		if fast_replaceable_group == name then return value end
 	end

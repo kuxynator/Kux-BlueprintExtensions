@@ -12,6 +12,53 @@ local Util = {}
 --- @field updater Updater
 --TODO define
 
+---Wrapper for LuaItemStack or LuaRecord
+---@class BlueprintItem : LuaItemStack, LuaRecord
+---@field record LuaRecord? The LuaRecord if that is one, else nil
+---@field itemStack LuaItemStack? The LuaItemStack if that is one, else nil
+---@field valid_for_write boolean
+---@field item LuaItem?
+
+---@Class BlueprintItemClass
+---@overload fun(obj: LuaItemStack|LuaRecord):BlueprintItem
+local BlueprintItem = {
+	__class="BlueprintItemClass"
+}
+
+---@diagnostic disable-next-line: param-type-mismatch
+setmetatable(BlueprintItem, {
+	---Returns a new instance of BlueprintItem
+	---@param self any
+	---@param obj LuaItemStack|LuaRecord
+	---@return BlueprintItem
+	__call = function(self, obj)
+		local newObj = {}
+		newObj.__base = obj
+		newObj.record = obj.object_name=="LuaRecord" and obj or false
+		newObj.itemStack  = obj.object_name=="LuaItemStack" and obj or false
+		newObj.valid_for_write = (newObj.itemStack and true) or (newObj.record and newObj.record.valid_for_write) or false
+		newObj.item = (newObj.itemStack and newObj.item and newObj.item) or false
+		setmetatable(newObj,{
+			__index = obj,
+			__newindex = obj
+		})
+		return setmetatable({}, {
+			__index = function (self, key)
+				if key=="record"    then return self.record and self.record or nil end
+				if key=="itemStack" then return self.itemStack and self.itemStack or nil end
+				if key=="item"      then return self.item and self.item or nil end
+				return newObj[key] or obj[key]
+			end,
+			__newindex=function () error("Invalid oparation") end,
+		})
+	end,
+	__index=function () error("Invalid oparation") end,
+	__newindex=function () error("Invalid oparation") end,
+	__metatable = false
+}
+)
+
+--[[
 --- Returns the item if it is a blueprint, the selected blueprint in the book if it is a blueprint book, or nil.
 --- @param bp LuaItemStack?
 --- @return LuaItemStack?
@@ -25,6 +72,38 @@ function Util.get_blueprint(bp)
     end
     if not bp.is_blueprint then return nil end
     return bp
+end
+]]
+
+--- Returns the item if it is a blueprint, the selected blueprint in the book if it is a blueprint book, or nil.
+--- @param obj LuaItemStack|LuaRecord|LuaPlayer
+--- @return BlueprintItem?
+function Util.get_blueprint(obj)
+	if not obj then return nil end
+	if obj.object_name=="LuaPlayer" then
+		return Util.get_blueprint(obj.cursor_record) or Util.get_blueprint(obj.cursor_stack) or nil
+	elseif obj.object_name=="LuaRecord" then local record = obj --[[@as LuaRecord]]
+		if record.type=="blueprint-book" then
+			if not record.contents then return nil end
+			if #record.contents == 0 then return nil end
+			if not pcall(function() return record["active_index"] end) then return nil end
+			return Util.get_blueprint(record.contents[record.active_index]) --TODO missing API LuaRecord.active_index
+		elseif record.type=="blueprint" then
+			return BlueprintItem(record)
+		else return nil --"deconstruction-planner" "upgrade-planner"
+		end
+	elseif obj.object_name=="LuaItemStack" then local itemStack = obj --[[@as LuaItemStack]]
+		if not (itemStack and itemStack.valid and itemStack.valid_for_read) then return nil end
+		if itemStack.is_blueprint_book and itemStack.active_index then
+			local inventory = itemStack.get_inventory(defines.inventory.item_main)
+			if not inventory then return nil end
+			if inventory.get_item_count() == 0 then return nil end
+			return Util.get_blueprint(inventory[itemStack.active_index])
+		end
+		if not itemStack.is_blueprint then return nil end
+		return BlueprintItem(itemStack)
+	else return nil
+	end
 end
 
 --- will replace Util.get_blueprint
