@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------------------------------
+Version: 3.3.8
+  Features:
+    - added zh-CN locale (reqest by plexpt)
+    - [WIP] convert blueprint command, to convert old rail blueprints to new rail blueprints
+---------------------------------------------------------------------------------------------------
 Version: 3.3.7
   Changes:
     - supports writable bluprint from bluprint library again (was disabled in Factorio 1.1)

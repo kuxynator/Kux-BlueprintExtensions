@@ -15,6 +15,7 @@ require('actions/wireswap')
 require('actions/rotate')
 require('actions/tempprint')
 require('actions/landfill')
+require('actions/convert')
 
 local function dispatch_action(event, action)
     if not action or not action.handler then return end
