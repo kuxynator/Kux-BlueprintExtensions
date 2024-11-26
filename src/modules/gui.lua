@@ -57,8 +57,7 @@ function GUI.update_visibility(player, force)
 
     local bp = (Util.get_blueprint(player))
 	local showButtonFlow = (bp and bp.valid_for_write) or false --TODO implement temporay blueprint fallback
-	if bp and bp.prototype.hidden then showButtonFlow = false end -- hide UI for hidden blueprints (useable for internal fake blueprint items, like map selections tools)
-
+	
     local was_enabled = pdata.buttons_enabled
 
     if (not force and was_enabled ~= nil and showButtonFlow == was_enabled) then

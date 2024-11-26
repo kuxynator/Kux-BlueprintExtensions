@@ -101,6 +101,7 @@ function Util.get_blueprint(obj)
 			return Util.get_blueprint(inventory[itemStack.active_index])
 		end
 		if not itemStack.is_blueprint then return nil end
+		if itemStack.prototype.hidden then return nil end -- new  feature. ignore hidden blueprints
 		return BlueprintItem(itemStack)
 	else return nil
 	end
