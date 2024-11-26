@@ -1,12 +1,12 @@
 {
     "name": "Kux-BlueprintExtensions",
-    "version": "3.3.8",
+    "version": "3.3.9",
     "title": "Blueprint Extensions (Kux Edition)",
     "author": "kuxynator",
     "factorio_version": "2.0",
     "dependencies": [
 		"base",
-		"Kux-CoreLib >= 3.12.0",
+		"Kux-CoreLib >= 3.15.0",
 				"? fluid_permutations",
 		"? fluid_permutations_fixed >= 0.6.0",
 				"(?) GDIW",

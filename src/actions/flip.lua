@@ -164,7 +164,7 @@ function Flip.flip_action(player, event, action)
     local entities = bp.get_blueprint_entities()
 	print(serpent.block(entities))
     if entities then
-        for _,entity in pairs(entities) do ---@cast entity BlueprintEntity
+        for _,entity in pairs(entities) do ---@cast entity BlueprintEntity|table
             prototype = prototypes.entity[entity.name]
             name = (prototype and prototype.type) or entity.name
             direction = entity.direction or 0
@@ -180,9 +180,9 @@ function Flip.flip_action(player, event, action)
                     entity.direction = turn180(direction)
                 end
             elseif railNames[name] then
-                entity.direction = (translate.rail_offset - direction)%numWays
+                entity.direction = (translate.rail_offset - direction)%numWays --[[@as defines.direction]]
             elseif name == "storage-tank" then
-				entity.direction = isEorW(direction) and S or E
+				entity.direction = isEorW(direction) and S or E --[[@as defines.direction]]
             elseif name == "rail-signal" or name == "rail-chain-signal" then
                 if translate.signals[direction] ~= nil then
                     entity.direction = translate.signals[direction]
@@ -192,7 +192,7 @@ function Flip.flip_action(player, event, action)
                     entity.direction = translate.train_stops[direction]
                 end
             else
-                entity.direction = (translate.default_offset - direction)%numWays
+                entity.direction = (translate.default_offset - direction)%numWays --[[@as defines.direction]]
             end
 
             entity.position[axis] = -entity.position[axis]

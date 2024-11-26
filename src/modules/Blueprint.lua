@@ -5,8 +5,8 @@ local Blueprint = {}
 Blueprint.exportToTable = function(bp)
 	local exportStack = bp.export_stack()
 	exportStack = string.sub(exportStack,2)
-	local json = game.decode_string(exportStack)
-	local t = game.json_to_table(json)
+	local json = helpers.decode_string(exportStack)
+	local t = helpers.json_to_table(json)
 	return t
 end
 
@@ -14,8 +14,8 @@ end
 --@param bp [LuaItemStack]
 --@param t  the table to import
 Blueprint.importFromTable = function(bp, t)
-	local json = game.table_to_json(t)
-	local exportStack = "0"..game.encode_string(json)
+	local json = helpers.table_to_json(t)
+	local exportStack = "0"..helpers.encode_string(json)
 	local result = bp.import_stack(exportStack)
 	-- 0 if the import succeeded with no errors. -1 if the import succeeded with errors. 1 if the import failed.
 	return result

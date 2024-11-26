@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------------------------------
+Version: 3.3.9
+  Features:
+    - Hide UI for blueprints with "hidden" flag
+  Bugfixes:
+    - fix Blueprint still called old 1.1 functions
+---------------------------------------------------------------------------------------------------
 Version: 3.3.8
   Features:
     - added zh-CN locale (reqest by plexpt)
