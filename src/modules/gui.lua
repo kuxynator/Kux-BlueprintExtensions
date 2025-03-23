@@ -48,7 +48,7 @@ end
 ---@param player LuaPlayer
 ---@param force any
 function GUI.update_visibility(player, force)
-    log("GUI.update_visibility")
+    --log("GUI.update_visibility")
     local pdata = storage.playerdata[player.index]
     if not pdata then
         pdata = {}
@@ -57,7 +57,7 @@ function GUI.update_visibility(player, force)
 
     local bp = (Util.get_blueprint(player))
 	local showButtonFlow = (bp and bp.valid_for_write) or false --TODO implement temporay blueprint fallback
-	
+
     local was_enabled = pdata.buttons_enabled
 
     if (not force and was_enabled ~= nil and showButtonFlow == was_enabled) then

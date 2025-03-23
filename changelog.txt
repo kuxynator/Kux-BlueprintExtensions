@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 3.3.11
+  Features:
+    - added bpex command
+  Bugfixes:
+    - fix get_overlapping_tiles
+    - remove log("GUI.update_visibility")
+---------------------------------------------------------------------------------------------------
 Version: 3.3.10
   Bugfixes:
     - fix crash

@@ -33,7 +33,7 @@ function Tempprint.nuke_temporary(player_index)
 
 	local player = game.players[player_index]
     local stack = player.cursor_stack
-    if not (stack.valid and stack.valid_for_read and stack.type == 'blueprint' and stack.item_number ~= 0) then return end
+    if not (stack and stack.valid and stack.valid_for_read and stack.type == 'blueprint' and stack.item_number ~= 0) then return end
 
     if stack.name == tempitem.name and stack.item_number == tempitem.item_number then
         stack.clear()
@@ -48,6 +48,7 @@ local function clear_temporary_event(event)
 end
 
 script.on_event(mod.prefix.."cleared_cursor_proxy", function(event)
+	---@cast event EventData.CustomInputEvent
 	return Tempprint.nuke_temporary(event.player_index) end
 )
 

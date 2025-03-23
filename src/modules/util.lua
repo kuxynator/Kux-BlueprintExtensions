@@ -18,12 +18,20 @@ local Util = {}
 ---@field itemStack LuaItemStack? The LuaItemStack if that is one, else nil
 ---@field valid_for_write boolean
 ---@field item LuaItem?
+---@field export_stack fun():string
 
 ---@Class BlueprintItemClass
 ---@overload fun(obj: LuaItemStack|LuaRecord):BlueprintItem
 local BlueprintItem = {
 	__class="BlueprintItemClass"
 }
+
+---@param self BlueprintItem
+local function export_stack(self)
+	if self.itemStack then return self.itemStack.export_stack() end
+	if self.record then return Util.export_record(self.record) end
+	return nil
+end
 
 ---@diagnostic disable-next-line: param-type-mismatch
 setmetatable(BlueprintItem, {
@@ -32,12 +40,13 @@ setmetatable(BlueprintItem, {
 	---@param obj LuaItemStack|LuaRecord
 	---@return BlueprintItem
 	__call = function(self, obj)
-		local newObj = {}
+		local newObj = {} --@type BlueprintItem
 		newObj.__base = obj
 		newObj.record = obj.object_name=="LuaRecord" and obj or false
 		newObj.itemStack  = obj.object_name=="LuaItemStack" and obj or false
 		newObj.valid_for_write = (newObj.itemStack and true) or (newObj.record and newObj.record.valid_for_write) or false
 		newObj.item = (newObj.itemStack and newObj.item and newObj.item) or false
+		newObj.export_stack = function() return export_stack(newObj) end
 		setmetatable(newObj,{
 			__index = obj,
 			__newindex = obj
@@ -77,17 +86,24 @@ end
 
 --- Returns the item if it is a blueprint, the selected blueprint in the book if it is a blueprint book, or nil.
 --- @param obj LuaItemStack|LuaRecord|LuaPlayer
+--- @param player LuaPlayer? If obj is a `blueprint-book`, then 'player' must be specified.
 --- @return BlueprintItem?
-function Util.get_blueprint(obj)
+--- @overload fun(obj: LuaPlayer):BlueprintItem?
+--- @overload fun(obj: LuaRecord, LuaPlayer):BlueprintItem?
+function Util.get_blueprint(obj, player)
 	if not obj then return nil end
 	if obj.object_name=="LuaPlayer" then
-		return Util.get_blueprint(obj.cursor_record) or Util.get_blueprint(obj.cursor_stack) or nil
+		return Util.get_blueprint(obj.cursor_record, obj) or Util.get_blueprint(obj.cursor_stack, obj) or nil
 	elseif obj.object_name=="LuaRecord" then local record = obj --[[@as LuaRecord]]
 		if record.type=="blueprint-book" then
 			if not record.contents then return nil end
 			if #record.contents == 0 then return nil end
-			if not pcall(function() return record["active_index"] end) then return nil end
-			return Util.get_blueprint(record.contents[record.active_index]) --TODO missing API LuaRecord.active_index
+			if not pcall(function() return type(record["get_active_index"])=="function" end) then
+				log("record.get_active_index() requires Factorio 2.0.29")
+				return nil
+			end --
+			if not player then return nil end -- TODO revise silent fail!
+			return Util.get_blueprint(record.contents[record.get_active_index(player)], player)
 		elseif record.type=="blueprint" then
 			return BlueprintItem(record)
 		else return nil --"deconstruction-planner" "upgrade-planner"
@@ -122,21 +138,116 @@ function Util.tryGetBlueprint(player)
 end
 
 --- Create or return a dummy storage surface
+--- @return LuaSurface
 function Util.get_dummy_surface()
-    if game.surfaces.surface_of_holding then
-        return game.surfaces.surface_of_holding
-    end
+    if game.surfaces.surface_of_holding then return game.surfaces.surface_of_holding end
 
     local none = { frequency = "none" }
     local autoplace_controls = {}
-    for k,_ in pairs(prototypes.autoplace_control) do
-        autoplace_controls[k] = none
-    end
-    return game.create_surface(
-        'surface_of_holding',
+    for k,_ in pairs(prototypes.autoplace_control) do autoplace_controls[k] = none end
+    return game.create_surface('surface_of_holding',
         { width=1, height=1, autoplace_controls = autoplace_controls }
     )
 end
+
+function Util.get_temp_surface_name(name) return "BPEx_temp_surface_"..name end
+
+function Util.get_temp_surface(name)
+	name = Util.get_temp_surface_name(name)
+    if game.surfaces[name] then return game.surfaces[name] end
+
+    local none = { frequency = "none" }
+    local autoplace_controls = {}
+    for k,_ in pairs(prototypes.autoplace_control) do autoplace_controls[k] = none end
+    return game.create_surface(name,
+        { width=1, height=1, autoplace_controls = autoplace_controls }
+    )
+end
+
+---
+---@param surface LuaSurface
+---@param index integer?
+---@return LuaEntity
+function Util.get_temp_chest(surface, index)
+	if not index or index < 1 then index = 1 end
+	local position = {x = index, y = 0}
+	local entities = surface.find_entities_filtered{name = "steel-chest", position = position}
+	if #entities > 0 then return entities[1] end
+	local chest = surface.create_entity{name = "steel-chest", position = position, force = "neutral"}
+	return chest or error("Failed to create temp chest")
+end
+
+function Util.get_temp_inventory()
+	local chest = Util.get_temp_chest(Util.get_temp_surface("temp_inventory"))
+	return chest.get_inventory(defines.inventory.chest)
+end
+
+function Util.destroy_temp_inventory()
+	local surface = Util.get_temp_surface_name("temp_inventory")
+	if game.surfaces[surface] then game.delete_surface(game.surfaces[surface]) end
+end
+
+---@class BlueprintData
+---@field entities BlueprintEntity[]?
+---@field tiles Tile[]?
+---@field absolute_snapping boolean
+---@field position_relative_to_grid TilePosition?
+---@field snap_to_grid TilePosition?
+---@field icons BlueprintSignalIcon[]
+---@field label string
+
+
+---@param record LuaRecord
+---@return BlueprintData
+function Util.copy_record_to_table(record)
+	local bp_data = {
+		entities = table.deepcopy(record.get_blueprint_entities()),
+		tiles = table.deepcopy(record.get_blueprint_tiles()),
+		absolute_snapping = record.blueprint_absolute_snapping,
+		position_relative_to_grid = record.blueprint_position_relative_to_grid,
+		snap_to_grid = record.blueprint_snap_to_grid,
+		icons = table.deepcopy(record.default_icons),
+		--TODO: label = record.label ???  missing API
+	}
+	return bp_data
+end
+
+---@param bp_data BlueprintData
+---@param item_stack LuaItemStack
+function Util.copy_table_to_item_stack(bp_data, item_stack)
+	item_stack.set_blueprint_entities(bp_data.entities)
+	item_stack.set_blueprint_tiles(bp_data.tiles)
+	item_stack.blueprint_absolute_snapping = bp_data.absolute_snapping
+	item_stack.blueprint_snap_to_grid = bp_data.snap_to_grid
+	item_stack.blueprint_position_relative_to_grid = bp_data.position_relative_to_grid
+	--item_stack.label = NOT the BP name! / bp_data.label --TODO: record.label -- missing API
+	--item_stack.default_icons = bp_data.icons -- default_icons is read only.
+	item_stack.preview_icons = bp_data.icons
+	-- item_stack.allow_manual_label_change = true
+	--item_stack.label_color = ???
+end
+
+---
+---@param record LuaRecord
+---@return string
+function Util.export_record(record)
+	local bp_data = Util.copy_record_to_table(record)
+
+	local inventory = Util.get_temp_inventory()
+	inventory.insert("blueprint")
+	local item_stack = inventory[1]
+	Util.copy_table_to_item_stack(bp_data, item_stack)
+
+	local blueprint_string = item_stack.export_stack()
+	Util.destroy_temp_inventory()
+	return blueprint_string
+end
+
+function Util.copy_blueprint(bp, item_stack)
+	local bp_data = Util.copy_record_to_table(bp)
+	Util.copy_table_to_item_stack(bp_data, item_stack)
+end
+
 
 -- Store an item stack in the Surface of Holding(tm)
 function Util.store_item(player_index, key, item)
@@ -190,8 +301,6 @@ function Util.fetch_item(player_index, key)
     pdata.stored_items[key] = nil
     return
 end
-
-
 
 --- Get or initialize player data.
 --- @param player_index integer

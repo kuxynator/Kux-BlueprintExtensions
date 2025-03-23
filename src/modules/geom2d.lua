@@ -407,16 +407,16 @@ do
             setmetatable(result, { __index = function(t, k) local v = {}; t[k] = v; return v end })
         end
 
-        if not box.orientation or box.orientation == 0 then
-            for x = floor(box.left_top.x), ceil(box.right_bottom.x - 1) do
-                for y = floor(box.left_top.y), ceil(box.right_bottom.y - 1) do
+        if not rect.orientation or rect.orientation == 0 then
+            for x = floor(rect.left_top.x), ceil(rect.right_bottom.x - 1) do
+                for y = floor(rect.left_top.y), ceil(rect.right_bottom.y - 1) do
                     result[x][y] = tile
                 end
             end
             return result
         end
 
-        local rect = area_to_rectangle(box)  -- Convert to box
+        local rect = area_to_rectangle(rect)  -- Convert to box
 
         local function check_axis(ax, ay, x, y)
             local amin, amax = _extents(ax, ay, rect)
