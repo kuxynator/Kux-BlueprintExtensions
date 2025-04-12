@@ -35,6 +35,7 @@ end
 
 ---@diagnostic disable-next-line: param-type-mismatch
 setmetatable(BlueprintItem, {
+
 	---Returns a new instance of BlueprintItem
 	---@param self any
 	---@param obj LuaItemStack|LuaRecord
@@ -52,10 +53,10 @@ setmetatable(BlueprintItem, {
 			__newindex = obj
 		})
 		return setmetatable({}, {
-			__index = function (self, key)
-				if key=="record"    then return self.record and self.record or nil end
-				if key=="itemStack" then return self.itemStack and self.itemStack or nil end
-				if key=="item"      then return self.item and self.item or nil end
+			__index = function (t, key)
+				if key=="record"    then return newObj.record and newObj.record or nil end
+				if key=="itemStack" then return newObj.itemStack and newObj.itemStack or nil end
+				if key=="item"      then return newObj.item and newObj.item or nil end
 				return newObj[key] or obj[key]
 			end,
 			__newindex=function () error("Invalid oparation") end,
