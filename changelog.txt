@@ -1,4 +1,11 @@
 ---------------------------------------------------------------------------------------------------
+Version: 3.3.13
+  Bugfixes:
+    - fix 'add landfill'
+    - fix 'wire wap'
+  Bugfixes:
+    - add 'remove landfill'
+---------------------------------------------------------------------------------------------------
 Version: 3.3.12
   Bugfixes:
     - fix a crash when updating a bluprint

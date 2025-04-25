@@ -21,8 +21,10 @@ local adjust_box = Geom2D.adjust_box
 local get_overlapping_tiles = Geom2D.get_overlapping_tiles
 
 local function requires_landfill(prototype)
-    local m = prototype.collision_mask
-    return (m and (m['water-tile'] or m['item-layer'])) and true or false
+	if not prototype.collision_mask then return false end
+    local m = prototype.collision_mask.layers
+	if not m then return false end
+    return (m['water_tile'] or m['item']) and true or false
 end
 
 function Landfill.compute_prototype_overrides()
@@ -219,6 +221,10 @@ Landfill.on_configuration_changed = Landfill.destroy_prototype_overrides
 
 --Landfill.on_configuration_changed = Landfill.compute_prototype_overrides
 
+---
+---@param player LuaPlayer
+---@param event any
+---@param action any
 function Landfill.landfill_action(player, event, action)
 	log("landfill_action")
     local bp = Util.get_blueprint(player)
@@ -319,29 +325,23 @@ function Landfill.landfill_action(player, event, action)
         return
     end
 
-    local blueprint_icons = bp.blueprint_icons
+    local blueprint_icons = bp.preview_icons
     local label = bp.label
     local label_color = bp.label_color
     name = bp.name
 
-    if not clear_cursor(player) then
+    if not player.clear_cursor() then
         player.print({"bpex.error_cannot_set_stack"})
         return
 	end
 
-	--TODO log landfill
-	--log("DEBUG entities:")
-	--log(serpent.block(entities)) --DEBUG
-	--log("DEBUG tiles:")
-	--log(serpent.block(tiles)) --DEBUG
-
-    local stack = player.cursor_stack
+    local stack = player.cursor_stack or error("invalid state")
     stack.set_stack(name)
     stack.set_blueprint_entities(entities)
     stack.set_blueprint_tiles(tiles)
     if label then stack.label = label end
     if label_color then stack.label_color = label_color end
-    if blueprint_icons then stack.blueprint_icons = blueprint_icons end
+    if blueprint_icons then stack.preview_icons = blueprint_icons end
 
     if mode == 'tempcopy' then
         Tempprint.set_temporary(player)

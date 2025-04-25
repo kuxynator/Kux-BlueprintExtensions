@@ -63,7 +63,15 @@ data:extend{
         type = "string-setting",
         name = mod.prefix.."landfill-mode",
         setting_type = "runtime-per-user",
-        order = "e",
+        order = "e1",
+        default_value = 'tempcopy',
+        allowed_values = {'update', 'copy', 'tempcopy'}
+    },
+	{
+        type = "string-setting",
+        name = mod.prefix.."remove-landfill-mode",
+        setting_type = "runtime-per-user",
+        order = "e2",
         default_value = 'tempcopy',
         allowed_values = {'update', 'copy', 'tempcopy'}
     },
@@ -100,6 +108,13 @@ data:extend{
         name = mod.prefix.."show-landfill",
         setting_type = "runtime-per-user",
         order = "f5",
+        default_value = true,
+    },
+	{
+        type = "bool-setting",
+        name = mod.prefix.."show-remove-landfill",
+        setting_type = "runtime-per-user",
+        order = "f6",
         default_value = true,
     },
 }

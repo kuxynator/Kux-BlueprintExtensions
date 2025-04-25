@@ -34,7 +34,7 @@ function GUI.setup(player)
                 type = "sprite-button",
                 style = (action.shortcut_style and "shortcut_bar_button_" .. action.shortcut_style) or "shortcut_bar_button",
                 sprite = action.name,
-                tooltip = { "controls." .. action.name },
+                tooltip = {""," ", {"controls." .. action.name} },
                 enabled = true,
             }
         end

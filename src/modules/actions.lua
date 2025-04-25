@@ -64,6 +64,13 @@ local actions = {
         visibility_setting = mod.prefix.."show-landfill",
         shortcut_style = 'blue',
     },
+	[mod.prefix.."remove-landfill"] = {
+        icon = 6,
+        key_sequence = "CONTROL + SHIFT + ALT + L",
+        order = 'c-d',
+        visibility_setting = mod.prefix.."show-remove-landfill",
+        shortcut_style = 'blue',
+    },
     [mod.prefix.."snap-center"] = {
         key_sequence = "PAD 5",
         order = 'f-a',
