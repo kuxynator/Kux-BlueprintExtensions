@@ -292,7 +292,7 @@ function Flip.flip_action(player, event, action)
                 if support_fluid_permutations then
 					-- support fluid_permutations
 					local result = FluidPermutation.flipRecipe(entity.recipe)
-					if result then entity.recipe = result end
+					if result and prototypes.recipe[result] then entity.recipe = result end
 				elseif support_gdiw then
 					-- Support GDIW
 					local t

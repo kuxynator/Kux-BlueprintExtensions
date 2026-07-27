@@ -85,6 +85,26 @@ function Util.get_blueprint(bp)
 end
 ]]
 
+---FIX for Factorios BUG itemStack.active_index point to invalid slot
+local function getValidBlueprint(inventory, startIndex)
+	local size = #inventory
+	for i = startIndex, size do
+		local slot = inventory[i]
+		if slot.valid_for_read then return slot end
+	end
+	-- optional: Schleife abbrechen, wenn du Verhalten exakt wie Factorio willst
+	return nil
+end
+
+local function coerce_active_index(inventory, active_index)
+	local size = #inventory
+	for offset = 0, size - 1 do
+		local idx = ((active_index - 1 + offset) % size) + 1
+		if inventory[idx].valid_for_read then return idx end
+	end
+	return nil
+end
+
 --- Returns the item if it is a blueprint, the selected blueprint in the book if it is a blueprint book, or nil.
 --- @param obj LuaItemStack|LuaRecord|LuaPlayer
 --- @param player LuaPlayer? If obj is a `blueprint-book`, then 'player' must be specified.
@@ -114,8 +134,8 @@ function Util.get_blueprint(obj, player)
 		if itemStack.is_blueprint_book and itemStack.active_index then
 			local inventory = itemStack.get_inventory(defines.inventory.item_main)
 			if not inventory then return nil end
-			if inventory.get_item_count() == 0 then return nil end
-			return Util.get_blueprint(inventory[itemStack.active_index])
+			local active_index = coerce_active_index(inventory, itemStack.active_index)
+			return active_index and Util.get_blueprint(inventory[active_index]) or nil
 		end
 		if not itemStack.is_blueprint then return nil end
 		if itemStack.prototype.hidden then return nil end -- new  feature. ignore hidden blueprints

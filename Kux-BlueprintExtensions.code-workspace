@@ -19,8 +19,7 @@
 			},
 			{
 				"name": "Debug",
-				"factorioPath": "e:\\Program Files\\Factorio\\2.0\\Debug\\bin\\x64\\factorio.exe",
-				"active": true
+				"factorioPath": "e:\\Program Files\\Factorio\\2.0\\Debug\\bin\\x64\\factorio.exe"
 			}
 		],
 		"Lua.workspace.userThirdParty": [
