@@ -1,4 +1,4 @@
-_G.mod = require("mod") --[[@as mod]]
+_G.mod = require("mod").initStage().asGlobal() --[[@as mod]]
 --require 'prototypes/inputs'
 require 'prototypes/items'
 --require 'prototypes/style'

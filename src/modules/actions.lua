@@ -72,7 +72,7 @@ local actions = {
         shortcut_style = 'blue',
     },
     [mod.prefix.."snap-center"] = {
-        key_sequence = "PAD 5",
+        key_sequence = "KP_5",
         order = 'f-a',
         data = 'center',
         shortcut_style = 'blue',
@@ -93,20 +93,20 @@ for ix, t in pairs({
     local key = t[2]
 
     actions[mod.prefix.."snap-" .. d] = {
-        key_sequence = "PAD " .. key,
+        key_sequence = "KP_" .. key,
         order = 'd-' .. ix,
         data = d,
     }
 
     actions[mod.prefix.."nudge-" .. d] = {
-        key_sequence = "CONTROL + PAD " .. key,
+        key_sequence = "CONTROL + KP_" .. key,
         order = 'e-' .. ix,
         data = d,
     }
 end
 
 actions[mod.prefix.."snap-center"] = {
-    key_sequence = "PAD 5",
+    key_sequence = "KP_5",
     order = 'f-a',
     data = 'center',
 }

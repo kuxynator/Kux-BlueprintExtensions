@@ -17,5 +17,5 @@ if(mod.current_stage=="control") then
 	require("__Kux-CoreLib__/lib/@")
 end
 
-_G.mod = mod
-return mod
+_G.mod = mod:protect()
+return _G.mod

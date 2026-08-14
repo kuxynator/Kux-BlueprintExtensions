@@ -9,7 +9,9 @@
 		"mods",
 		"data",
 		"serpent",
-		"__Profiler"
+		"__Profiler",
+		"require",
+		"math"
 	],
 	"Lua.workspace.library": [
 		"../Kux-CoreLib/src/lib",

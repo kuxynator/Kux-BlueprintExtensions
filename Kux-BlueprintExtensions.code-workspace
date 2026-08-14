@@ -20,6 +20,10 @@
 			{
 				"name": "Debug",
 				"factorioPath": "e:\\Program Files\\Factorio\\2.0\\Debug\\bin\\x64\\factorio.exe"
+			},
+			{
+				"name": "Migration2.1",
+				"factorioPath": "e:\\Program Files\\Factorio\\2.0\\ModMigration2.1\\bin\\x64\\factorio.exe"
 			}
 		],
 		"Lua.workspace.userThirdParty": [

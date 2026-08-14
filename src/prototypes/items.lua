@@ -37,11 +37,15 @@ elseif isV2 then
 				border_color = { r = 0, g = 1, b = 0 },  -- selection_color
 				mode = { "blueprint" },                  -- selection_mode
 				cursor_box_type = "copy",                -- selection_cursor_box_type
+				ignore_cannot_select_entities = isV21 and true or nil,
+				ignore_cannot_select_tiles = isV21 and true or nil,
 			},
 			alt_select = {
 				border_color = { r = 0, g = 1, b = 0 },  -- alt_selection_color
 				mode = { "blueprint" },                  -- alt_selection_mode
 				cursor_box_type = "copy",                -- alt_selection_cursor_box_type
+				ignore_cannot_select_entities = isV21 and true or nil,
+				ignore_cannot_select_tiles = isV21 and true or nil,
 			},
 
 			--?? show_in_library = false

@@ -1,4 +1,4 @@
-_G.mod = require("mod") --[[@as mod]]
+_G.mod = require("mod").initStage().asGlobal() --[[@as mod]]
 
 require("modules/bootstrap")
 
@@ -37,7 +37,7 @@ for name, action in pairs(actions) do
 	end
 end
 
-EventDistributor.register(defines.events.on_gui_click,function(event)
+EventDistributor.register(defines.events.on_gui_click, function(event)
 	return dispatch_action(event, actions[event.element.name])
 end)
 

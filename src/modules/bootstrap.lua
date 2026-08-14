@@ -1,4 +1,5 @@
 local function init_globals()
+	---@type { [int]: PlayerData } player_index -> PlayerData
     storage.playerdata = storage.playerdata or {}
 end
 
